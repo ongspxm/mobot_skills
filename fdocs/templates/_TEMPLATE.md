@@ -17,6 +17,8 @@ What we're solving and why it matters.
 ## Solution
 
 How to implement it. Be specific about approach.
+Look thru the current context and think about what's the most surgical way to implement it.
+keep the draft clean and tight. we want compact changes.
 
 ## Files to Modify
 

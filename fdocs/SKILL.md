@@ -91,6 +91,7 @@ Core conventions:
   - update `notes` when provided
   - move file to `docs/fdocs/archive/`
   - regenerate `docs/fdocs/_INDEX.md`
+- after running the script, manually add a `CHANGELOG.md` entry under `## [Unreleased]` in the appropriate Keep a Changelog category (`### Added`, `### Changed`, `### Fixed`, etc.) when `CHANGELOG.md` exists
 
 ### fdocs explore
 
@@ -145,7 +146,7 @@ Core conventions:
     - If an active fdoc is relevant, propose concrete updates to its `## Solution` section.
     - Do not auto-edit the fdoc; present suggested edits for approval.
 - Notes:
-  - Always use 4 angles.
+  - Always use 4 angles. format eg, angle1 xxxx, angle2 yyyy, etc
   - Keep agents independent (no cross-anchoring).
   - Prefer fast, high-signal synthesis over over-polished output.
 
