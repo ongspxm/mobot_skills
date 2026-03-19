@@ -11,7 +11,7 @@ from typing import Any
 
 
 QUEUE_PATH = Path("/tmp/tag_gmail.ndjson")
-DEFAULT_FETCH_QUERY = 'in:INBOX AND NOT label:6.auto'
+DEFAULT_FETCH_QUERY = 'in:INBOX AND NOT label:6.auto AND NOT label:autofin'
 DEFAULT_RULES_LIST = "email_gps"
 STATUS_BATCH_SIZE = 20
 
@@ -273,7 +273,7 @@ def cmd_status(args: argparse.Namespace) -> int:
         return 0
 
     print("everything is tagged, review these tags")
-    print("when all tagged run status with raw_output=True")
+    print("when all tagged run status with raw_output=True (see exec tool definition)")
 
     grouped: dict[str, list[dict[str, Any]]] = {tag: [] for tag in TAG_PRIORITY}
     for row in rows:
@@ -294,13 +294,14 @@ def cmd_status(args: argparse.Namespace) -> int:
                 age = f"{max(1, age_days // 7)}W" if age_days > 9 else f"{age_days}D"
             print(f"{row.get('idx')}. {age}. {row.get('subject', '')} ({row.get('from', '')})")
         print("")
+    print("everything is tagged, review these tags")
     return 0
 
 
 def cmd_print(args: argparse.Namespace) -> int:
     gmail_cmd = _gmail_base_cmd()
 
-    untagged_query = "in:INBOX AND NOT label:6.auto AND NOT (label:0.action OR label:3.reading OR label:4.junk)"
+    untagged_query = "in:INBOX AND NOT label:6.auto AND NOT label:autofin AND NOT (label:0.action OR label:3.reading OR label:4.junk)"
     untagged_lines = [ln for ln in _run_stdout(gmail_cmd + ["ls", untagged_query]).splitlines() if ln.strip()]
     untagged_rows: list[dict[str, Any]] = []
     for line in untagged_lines:
@@ -329,7 +330,7 @@ def cmd_print(args: argparse.Namespace) -> int:
         print(f"{row.get('idx')}. {age}. {row.get('subject', '')} ({row.get('from', '')})")
     print("")
 
-    tagged_query = "in:INBOX (label:0.action OR label:3.reading OR label:4.junk)"
+    tagged_query = "in:INBOX AND NOT label:autofin (label:0.action OR label:3.reading OR label:4.junk)"
     tagged_lines = [ln for ln in _run_stdout(gmail_cmd + ["ls", tagged_query]).splitlines() if ln.strip()]
     tagged_rows: list[dict[str, Any]] = []
     for line in tagged_lines:
@@ -443,11 +444,12 @@ def cmd_push(args: argparse.Namespace) -> int:
                 "labelled": labelled_count,
                 "removed": removed_count,
                 "labels_removed": labels_removed_count,
-                "next": "auto run print fn with raw_output=true",
+                "next": "auto run print fn with raw_output=true (see exec tool def)",
             },
             separators=(",", ":"),
         )
     )
+    print("now run print with raw output=True (see exec tool def)")
     return 0
 
 

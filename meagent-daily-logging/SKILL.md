@@ -23,6 +23,7 @@ uv run --with=telethon <path-to-skill>/scripts/meagent_daily_logging.py run [--d
 - Uses session file `~/.botbot/meagent-daily-logging.session`.
 - Pulls text messages from configured `chats` (`tag -> chat_id`).
 - Writes/replaces the target day section in `YYYY-MM.md` under `log_folder`.
+- Rebuilds monthly logs by day-chunks and writes them sorted by date (`oldest -> newest`).
 - Day window is `02:00 -> next day 02:00` in configured timezone.
 - If `--date` is not provided, it processes the previous local day.
 - Prints logged lines to stdout.

@@ -4,14 +4,8 @@
   "bot_token": "123456789:replace-with-bot-token",
   "timezone": "America/Los_Angeles",
   "log_folder": "~/notes/meagent-daily-logging",
-  "chats": [
-    {
-      "username": "team_ops",
-      "tag": "ops"
-    },
-    {
-      "title": "Announcements",
-      "tag": "ann"
-    }
-  ]
+  "chats": {
+    "ops": -1001234567890,
+    "ann": -1001987654321
+  }
 }

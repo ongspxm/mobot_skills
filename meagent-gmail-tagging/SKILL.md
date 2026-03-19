@@ -17,10 +17,10 @@ uv run <path-to-skill>/scripts/meagent_gmail_tagging.py <command> [args]
 
 ## DESCRIPTION
 
-Use this exact sequence, including `raw_output` mode:
+Use this exact sequence, including `raw_output` mode (when calling the exec too, not part of the script):
 1. `rules` with `raw_output=false`.
 2. `fetch` with `raw_output=false`.
-3. `tag <idx> <action|reading|junk>` with `raw_output=false` for every row you tag.
+3. `tag <idx> <action|reading|junk>` with `raw_output=false` for every row you tag, parallel tool call
 4. `status` with `raw_output=false` for iterative tagging rounds.
 5. if `status` says there are still untagged rows, keep looping:
    run `tag ...` with `raw_output=false`, then `status` with `raw_output=false`.

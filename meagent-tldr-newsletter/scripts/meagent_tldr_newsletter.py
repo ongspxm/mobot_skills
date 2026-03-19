@@ -121,7 +121,10 @@ def _collect() -> tuple[list[str], dict[str, str]]:
 def cmd_read(_: argparse.Namespace) -> int:
     tids, items = _collect()
     PENDING_PATH.write_text(json.dumps({"thread_ids": tids}, separators=(",", ":")), encoding="utf-8")
-    print("\n\n".join(items.values()) if items else "no newsletter found")
+    if items:
+        print("\n\n".join(items.values()) + "\n\nNEXT: if user says ok, read skill and run trash")
+    else:
+        print("no newsletter found")
     return 0
 
 

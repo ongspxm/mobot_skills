@@ -5,7 +5,7 @@ import getpass
 import json
 import os
 import sys
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -65,9 +65,6 @@ async def collect_entries(
     if not api_hash:
         raise CliError("missing required config key: api_hash")
 
-    start_utc = start_local.astimezone(timezone.utc)
-    end_utc = end_local.astimezone(timezone.utc)
-
     try:
         for retry in range(2):
             client = TelegramClient(str(session_path), api_id, api_hash)
@@ -105,18 +102,18 @@ async def collect_entries(
                         entity = await client.get_entity(chat_id)
                     except Exception as exc:
                         raise CliError(f"failed to resolve chat target {chat_id!r}: {exc}") from exc
-                    async for msg in client.iter_messages(entity, offset_date=end_utc):
+                    async for msg in client.iter_messages(entity, offset_date=end_local+timedelta(days=1)):
                         if msg.date is None:
                             continue
-                        m_utc = msg.date.astimezone(timezone.utc)
-                        if m_utc >= end_utc:
-                            continue
-                        if m_utc < start_utc:
-                            break
+                        msg_local = msg.date.astimezone(start_local.tzinfo)
                         txt = (msg.message or "").strip()
+                        if msg_local >= end_local:
+                            continue
+                        if msg_local < start_local:
+                            break
                         text = "\n".join([l for l in txt.split("\n") if l.strip()])
                         if text:
-                            out.append((m_utc.astimezone(start_local.tzinfo), tag, text))
+                            out.append((msg_local, tag, text))
                 out.sort(key=lambda x: x[0])
                 return out
             finally:
@@ -130,19 +127,53 @@ async def collect_entries(
 
 def upsert_day(month_file: Path, day_header: str, log_lines: list[str]) -> None:
     existing = month_file.read_text(encoding="utf-8").splitlines() if month_file.exists() else []
-    start = -1
-    end = len(existing)
-    for i, line in enumerate(existing):
-        if line.strip() != f"# {day_header}":
+    chunks: list[tuple[str, list[str]]] = []
+    prefix: list[str] = []
+    header: str | None = None
+    body: list[str] = []
+    for line in existing:
+        line_text = line.strip()
+        candidate = line_text[2:].strip() if line_text.startswith("# ") else ""
+        try:
+            date.fromisoformat(candidate)
+            if header is not None:
+                chunks.append((header, body))
+            header = candidate
+            body = []
             continue
-        start = i
-        for j in range(i + 1, len(existing)):
-            if existing[j].startswith("# "):
-                end = j
-                break
-        break
-    block = [f"# {day_header}", *log_lines]
-    merged = existing + ([""] if existing else []) + block if start < 0 else existing[:start] + block + existing[end:]
+        except ValueError:
+            pass
+        if header is None:
+            prefix.append(line)
+            continue
+        body.append(line)
+    if header is not None:
+        chunks.append((header, body))
+
+    replaced = False
+    for idx in range(len(chunks) - 1, -1, -1):
+        if chunks[idx][0] == day_header:
+            chunks[idx] = (day_header, log_lines)
+            replaced = True
+            break
+    if not replaced:
+        chunks.append((day_header, log_lines))
+
+    merged: list[str] = []
+    if prefix:
+        merged.extend(prefix)
+        while merged and not merged[-1].strip():
+            merged.pop()
+        if chunks:
+            merged.append("")
+    sorted_chunks = sorted(chunks, key=lambda chunk: chunk[0])
+    for i, (sorted_header, sorted_body) in enumerate(sorted_chunks):
+        merged.append(f"# {sorted_header}")
+        merged.extend(sorted_body)
+        while merged and not merged[-1].strip():
+            merged.pop()
+        if i < len(sorted_chunks) - 1:
+            merged.append("")
     month_file.parent.mkdir(parents=True, exist_ok=True)
     month_file.write_text("\n".join(merged).rstrip() + "\n", encoding="utf-8")
 
