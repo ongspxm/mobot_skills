@@ -10,7 +10,7 @@
 
 ## fdocs + some misc setup
 ### fdocs lifecycle
-fdocs are tracked in `docs/fdocs/`. Each FD has a dedicated file (`fdXXX_title.md`) and `docs/fdocs/_INDEX.md` is generated from FD file frontmatter.
+fdocs are tracked in `docs/fdocs/`. Each FD has a dedicated file (`fdYYYYMMDD-HHMMSS-xxxx_title.md`) and `docs/fdocs/_INDEX.md` is generated from FD file frontmatter.
 - `closed`: `closed` date is set
 - `planned`: `planned` date is set and `closed` is empty
 - `open`: `active=true` and `planned`/`closed` are empty
@@ -27,7 +27,7 @@ fdocs are tracked in `docs/fdocs/`. Each FD has a dedicated file (`fdXXX_title.m
 - fdocs deep: workflow to do research for a fdoc
 
 ### fdocs conventions
-- fdocs files: `docs/fdocs/fdXXX_title.md` (`XXX` is zero-padded)
+- fdocs files: `docs/fdocs/fdYYYYMMDD-HHMMSS-xxxx_title.md` (timestamp + random suffix)
 - Archive: `docs/fdocs/archive/`
 - Source of truth: fdocs files (index is derived output)
 - Date format: `YYYY-MM-DD` for `planned` and `closed`

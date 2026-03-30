@@ -23,7 +23,7 @@ uv run <path-to-skill>/scripts/fdocs.py init
 uv run <path-to-skill>/scripts/fdocs.py new "your title"
 uv run <path-to-skill>/scripts/fdocs.py status
 uv run <path-to-skill>/scripts/fdocs.py status --grooming
-uv run <path-to-skill>/scripts/fdocs.py close fd001 --notes "done"
+uv run <path-to-skill>/scripts/fdocs.py close fd20260320-153015-a1b2 --notes "done"
 uv run <path-to-skill>/scripts/fdocs.py explore
 ```
 
@@ -31,8 +31,8 @@ uv run <path-to-skill>/scripts/fdocs.py explore
 
 Core conventions:
 
-- FD files: `docs/fdocs/fdXXX_title.md`
-- Numbering: derive from existing FD files (not from index rows)
+- FD files: `docs/fdocs/fdYYYYMMDD-HHMMSS-xxxx_title.md` (example: `fd20260320-153015-a1b2_feature_name.md`)
+- ID generation: current local timestamp to seconds + random 4-hex suffix
 - Source of truth: FD files are canonical; index is derived output
 - Archive path: `docs/fdocs/archive/`
 - Index path: `docs/fdocs/_INDEX.md`
@@ -64,9 +64,9 @@ Core conventions:
 
 ### fdocs new
 
-- Purpose: create next numbered fdoc from template.
+- Purpose: create a timestamped fdoc from template.
 - cmd: `uv run <path-to-skill>/scripts/fdocs.py new "Title"`
-- Output: `fdoc created: docs/fdocs/fdXXX_....md`
+- Output: `fdoc created: docs/fdocs/fdYYYYMMDD-HHMMSS-xxxx_....md`
 - After create, fill:
   - frontmatter: `active`, `planned`, `closed`, `notes`
   - sections: `Problem`, `Solution`, `Files to Modify`, `Verification`, `Related`

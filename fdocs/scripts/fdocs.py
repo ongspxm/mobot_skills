@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 import argparse
 import re
+import secrets
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+
+
+FD_TS_RE = re.compile(r"^(fd\d{8}-\d{6}-[a-z0-9]{4,})$", re.I)
+FD_NUM_RE = re.compile(r"^fd-?(\d+)$", re.I)
 
 
 class CliError(RuntimeError):
@@ -19,13 +24,23 @@ SKILL_DIR = Path(__file__).resolve().parents[1]
 TEMPLATES_DIR = SKILL_DIR / "templates"
 
 
-def fd_num(name: str) -> int:
-    m = re.match(r"fd-?(\d+)", name, re.I)
-    return int(m.group(1)) if m else 10**9
+def fd_sort_key(name: str) -> tuple[int, str, int]:
+    ts = re.match(r"^(fd\d{8}-\d{6}-[a-z0-9]{4,})", name, re.I)
+    if ts:
+        return (0, ts.group(1).lower(), 0)
+    n = re.match(r"^fd-?(\d+)", name, re.I)
+    if n:
+        return (1, "", int(n.group(1)))
+    return (2, name.lower(), 0)
 
 
 def fd_id(n: int) -> str:
     return f"fd{n:03d}" if n < 1000 else f"fd{n}"
+
+
+def next_fd_id() -> str:
+    now = datetime.now().strftime("%Y%m%d-%H%M%S")
+    return f"fd{now}-{secrets.token_hex(2)}"
 
 
 def slugify(title: str) -> str:
@@ -70,10 +85,10 @@ def scan(docs_dir: Path, warnings: list[str]) -> list[dict[str, str | Path | boo
         elif meta.get("active", "").strip().lower() == "true":
             status = "open"
 
-        fd = re.match(r"(fd-?\d+)", p.stem, re.I)
+        fd = re.match(r"(fd\d{8}-\d{6}-[a-z0-9]{4,}|fd-?\d+)", p.stem, re.I)
         out.append(
             {
-                "fd": (fd_id(int(re.match(r"fd-?(\d+)", fd.group(1), re.I).group(1))) if fd else p.stem),
+                "fd": (fd_id(int(re.match(r"fd-?(\d+)", fd.group(1), re.I).group(1))) if fd and FD_NUM_RE.fullmatch(fd.group(1)) else fd.group(1).lower() if fd else p.stem),
                 "title": title,
                 "status": status,
                 "notes": meta.get("notes", "").strip(),
@@ -96,13 +111,13 @@ def table(headers: list[str], rows: list[list[str]], empty: list[str]) -> str:
 
 
 def write_index(index_path: Path, docs: list[dict[str, str | Path | bool]]) -> None:
-    active = sorted([d for d in docs if d["status"] in {"open", "planned"}], key=lambda x: fd_num(str(x["fd"])))
-    backlog = sorted([d for d in docs if d["status"] == "backlog"], key=lambda x: fd_num(str(x["fd"])))
+    active = sorted([d for d in docs if d["status"] in {"open", "planned"}], key=lambda x: fd_sort_key(str(x["fd"])))
+    backlog = sorted([d for d in docs if d["status"] == "backlog"], key=lambda x: fd_sort_key(str(x["fd"])))
     closed = sorted(
         [d for d in docs if d["status"] == "closed"],
         key=lambda x: (
             str(x["closed"]) if re.match(r"^\d{4}-\d{2}-\d{2}$", str(x["closed"]) or "") else "0000-00-00",
-            fd_num(str(x["fd"])),
+            fd_sort_key(str(x["fd"])),
         ),
         reverse=True,
     )
@@ -147,17 +162,13 @@ def cmd_new(title: str) -> int:
     if not template.exists():
         raise CliError(f"missing template: {template}")
 
-    max_num = 0
-    for p in list(docs_dir.glob("*.md")) + list(archive_dir.glob("*.md")):
-        if p.name.startswith("_"):
-            continue
-        m = re.match(r"fd-?(\d+)", p.stem, re.I)
-        if m:
-            max_num = max(max_num, int(m.group(1)))
-    fd = fd_id(max_num + 1)
-    out = docs_dir / f"{fd}_{slugify(t)}.md"
-    if out.exists():
-        raise CliError(f"file already exists: {out}")
+    for _ in range(8):
+        fd = next_fd_id()
+        out = docs_dir / f"{fd}_{slugify(t)}.md"
+        if not out.exists() and not (archive_dir / out.name).exists():
+            break
+    else:
+        raise CliError("failed to allocate unique fdoc id")
 
     body = template.read_text(encoding="utf-8")
     safe_title = slugify(t).replace("_", " ")
@@ -264,14 +275,17 @@ def cmd_init() -> int:
 
 def cmd_close(fd: str, notes: str, date: str) -> int:
     token = fd.strip()
+    n: int | None = None
     if re.fullmatch(r"\d+", token):
         n = int(token)
         token = fd_id(n)
-    m_token = re.fullmatch(r"fd-?(\d+)", token, re.I)
-    if not m_token:
-        raise CliError("fd must be like 1, 001, fd001, fd-001, or fd1000")
-    n = int(m_token.group(1))
-    token = fd_id(n)
+    elif m_num := FD_NUM_RE.fullmatch(token):
+        n = int(m_num.group(1))
+        token = fd_id(n)
+    elif FD_TS_RE.fullmatch(token):
+        token = token.lower()
+    else:
+        raise CliError("fd must be like fd20260320-153015-a1b2 (or legacy 1, 001, fd001, fd-001)")
     try:
         datetime.strptime(date, "%Y-%m-%d")
     except ValueError:
@@ -281,14 +295,26 @@ def cmd_close(fd: str, notes: str, date: str) -> int:
     archive_dir = docs_dir / "archive"
     archive_dir.mkdir(parents=True, exist_ok=True)
 
+    ts_pat = re.compile(rf"^{re.escape(token)}(?:_|$)") if n is None else None
+
     matches = sorted(
-        p for p in docs_dir.glob("*.md") if not p.name.startswith("_") and (m := re.match(r"fd-?(\d+)", p.stem, re.I)) and int(m.group(1)) == n
+        p
+        for p in docs_dir.glob("*.md")
+        if not p.name.startswith("_")
+        and (
+            (n is not None and (m := re.match(r"fd-?(\d+)", p.stem, re.I)) and int(m.group(1)) == n)
+            or (n is None and ts_pat is not None and ts_pat.match(p.stem.lower()))
+        )
     )
     if not matches:
         archived = sorted(
             p
             for p in archive_dir.glob("*.md")
-            if not p.name.startswith("_") and (m := re.match(r"fd-?(\d+)", p.stem, re.I)) and int(m.group(1)) == n
+            if not p.name.startswith("_")
+            and (
+                (n is not None and (m := re.match(r"fd-?(\d+)", p.stem, re.I)) and int(m.group(1)) == n)
+                or (n is None and ts_pat is not None and ts_pat.match(p.stem.lower()))
+            )
         )
         if archived:
             raise CliError(f"already archived: {archived[0].relative_to(ROOT)}")
@@ -378,8 +404,8 @@ def cmd_status(grooming: bool) -> int:
     docs = scan(docs_dir, warnings)
     write_index(docs_dir / "_INDEX.md", docs)
 
-    active = sorted([d for d in docs if d["status"] in {"open", "planned"}], key=lambda x: fd_num(str(x["fd"])))
-    backlog = sorted([d for d in docs if d["status"] == "backlog"], key=lambda x: fd_num(str(x["fd"])))
+    active = sorted([d for d in docs if d["status"] in {"open", "planned"}], key=lambda x: fd_sort_key(str(x["fd"])))
+    backlog = sorted([d for d in docs if d["status"] == "backlog"], key=lambda x: fd_sort_key(str(x["fd"])))
     closed = [d for d in docs if d["status"] == "closed"]
     n_open = sum(1 for d in active if d["status"] == "open")
     n_planned = sum(1 for d in active if d["status"] == "planned")
@@ -426,7 +452,7 @@ def cmd_explore() -> int:
 
     warnings: list[str] = []
     docs = scan(docs_dir, warnings)
-    active = sorted([d for d in docs if d["status"] in {"open", "planned"}], key=lambda x: fd_num(str(x["fd"])))
+    active = sorted([d for d in docs if d["status"] in {"open", "planned"}], key=lambda x: fd_sort_key(str(x["fd"])))
     backlog = [d for d in docs if d["status"] == "backlog"]
     closed = [d for d in docs if d["status"] == "closed"]
     archived_count = sum(1 for d in docs if d["in_archive"])
@@ -518,7 +544,7 @@ def main() -> int:
     p_new = sub.add_parser("new", help="Create a new fdoc from docs/fdocs/_TEMPLATE.md")
     p_new.add_argument("title", help="FDoc title")
     p_close = sub.add_parser("close", help="Close an fdoc and move it to docs/fdocs/archive")
-    p_close.add_argument("fd", help="FD id (e.g. 1, 001, fd001, fd-001)")
+    p_close.add_argument("fd", help="FD id (e.g. fd20260320-153015-a1b2, 1, 001, fd001)")
     p_close.add_argument("--notes", default="", help="Optional closing notes")
     p_close.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"), help="Closed date (YYYY-MM-DD)")
     sub.add_parser("explore", help="Print fdocs status and recent repo activity")
