@@ -7,7 +7,7 @@ description: Send Telegram messages with optional image batches through a bot to
 
 ## NAME
 
-`botbot-telesend` - tiny Telegram sender CLI for text and photo uploads.
+`botbot-telesend` - tiny Telegram sender CLI for text and high-resolution image uploads.
 
 ## SYNOPSIS
 
@@ -20,10 +20,10 @@ uv run <path-to-skill>/scripts/botbot_telesend.py send (--text "hello" | --textf
 Sends a Telegram bot message to the configured default chat.
 
 - Uses `sendMessage` when no `--img` flags are supplied.
-- Uses `sendMediaGroup` for image batches of 2-10 photos.
-- Uses `sendPhoto` for single-photo batches (for example, remainder after chunking).
+- Uses `sendMediaGroup` for image batches of 2-10 documents (`type=document`).
+- Uses `sendDocument` for single-image batches (for example, remainder after chunking).
 - If more than 10 images are given, sends them in series of 10 per request.
-- Message text is attached once: as text-only content, or as the caption on the first sent photo/group.
+- Message text is attached once: as text-only content, or as the caption on the first sent file/group.
 - Text input supports either `--text` or `--textfile` (UTF-8 file).
 
 Default config location is `~/.botbot/botbot-telesend.json`.

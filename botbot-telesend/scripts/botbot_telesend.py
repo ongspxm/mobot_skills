@@ -127,18 +127,18 @@ class TelegramClient:
     def send_text(self, text: str) -> dict[str, Any]:
         return self._post_json("sendMessage", {"chat_id": self.chat_id, "text": text})
 
-    def send_photo(self, img: Path, caption: str | None) -> dict[str, Any]:
+    def send_document(self, img: Path, caption: str | None) -> dict[str, Any]:
         fields = {"chat_id": self.chat_id}
         if caption:
             fields["caption"] = caption
-        return self._post_multipart("sendPhoto", fields, [("photo", img)])
+        return self._post_multipart("sendDocument", fields, [("document", img)])
 
     def send_media_group(self, imgs: list[Path], caption: str | None) -> dict[str, Any]:
         media: list[dict[str, str]] = []
         files: list[tuple[str, Path]] = []
         for i, img in enumerate(imgs):
             key = f"file{i}"
-            item = {"type": "photo", "media": f"attach://{key}"}
+            item = {"type": "document", "media": f"attach://{key}"}
             if i == 0 and caption:
                 item["caption"] = caption
             media.append(item)
@@ -218,7 +218,7 @@ def main() -> int:
             batch = imgs[i : i + 10]
             caption = text if first_batch else None
             if len(batch) == 1:
-                results.append(client.send_photo(batch[0], caption))
+                results.append(client.send_document(batch[0], caption))
             else:
                 results.append(client.send_media_group(batch, caption))
             first_batch = False
