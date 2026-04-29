@@ -5,8 +5,6 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
 
 
 TLDR_SENDER = "@tldrnewsletter.com"
@@ -34,12 +32,6 @@ def _run(cmd: list[str]) -> str:
 
 
 def _clean_link(link: str) -> str:
-    if link.startswith("https://links.tldrnewsletter.com"):
-        try:
-            with urlopen(Request(link, method="GET"), timeout=20) as resp:
-                link = resp.geturl()
-        except (HTTPError, URLError):
-            pass
     for sep in ("?utm_", "&utm_"):
         if sep in link:
             return link.split(sep, 1)[0]
