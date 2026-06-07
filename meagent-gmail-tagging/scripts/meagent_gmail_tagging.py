@@ -294,7 +294,7 @@ def cmd_status(args: argparse.Namespace) -> int:
                 age = f"{max(1, age_days // 7)}W" if age_days > 9 else f"{age_days}D"
             print(f"{row.get('idx')}. {age}. {row.get('subject', '')} ({row.get('from', '')})")
         print("")
-    print("everything is tagged, review these tags")
+    print("NEXT: everything is tagged. CHECK if the last status call was run with raw_output=True, if not, run status with raw_output=True. NEXT: when user says ok, run push")
     return 0
 
 
@@ -449,7 +449,7 @@ def cmd_push(args: argparse.Namespace) -> int:
             separators=(",", ":"),
         )
     )
-    print("now run print with raw output=True (see exec tool def)")
+    print("NEXT: now run print with raw output=True (see exec tool def)")
     return 0
 
 
