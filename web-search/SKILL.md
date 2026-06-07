@@ -18,9 +18,7 @@ uv run <path-to-skill>/scripts/web_search.py search "query" --count 20
 
 ## DESCRIPTION
 
-Searches DuckDuckGo Lite with the `en-US` locale and no API key. Use it when a task needs public web results or links.
-
-Always run with `uv run`. For ordinary direct URL fetches, `curl` is usually fine; during web-search tasks, use this tool for search results.
+Use when you need to search for list of links. Otherwise visit pages directly using curl.
 
 ## COMMANDS
 
