@@ -9,7 +9,7 @@ from xml.etree import ElementTree as ET
 
 
 DEFAULT_TIMEOUT_SECONDS = 20
-GOOGLE_NEWS_RSS = "https://news.google.com/rss/search?q=when:24h%20allinurl:{domain}&hl=en-US&gl=US&ceid=US:en"
+GOOGLE_NEWS_RSS = "https://news.google.com/rss/search?q=when:24h%20site:{domain}&hl=en-US&gl=US&ceid=US:en"
 SOURCES = [("Reuters", "reuters.com"), ("Bloomberg", "bloomberg.com"), ("FT", "ft.com"), ("WSJ", "wsj.com")]
 DEFAULT_FEEDS = [(name, GOOGLE_NEWS_RSS.format(domain=domain)) for name, domain in SOURCES]
 
