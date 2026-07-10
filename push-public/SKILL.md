@@ -1,81 +1,36 @@
 ---
 name: push-public
-description: Use when the user wants to publish current work to the public branch as clean commit(s) without exposing main branch history.
+description: Publish main's tree on public as clean commits, without main history.
 ---
 
 # PUSH-PUBLIC(1)
 
 ## NAME
 
-`push-public` - snapshot `main` onto `public` as clean commit(s).
+`push-public` — snapshot `main` content onto `public`.
 
 ## SYNOPSIS
 
 ```bash
 git fetch --all --prune
-orig_ref=$(git symbolic-ref --quiet --short HEAD || git rev-parse --short HEAD)
-git checkout main
-git pull --ff-only origin main
-git checkout "$orig_ref"
-git worktree add ../public-sync public
-cd ../public-sync
-git checkout public
+orig_ref=$(git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
+git checkout main && git pull --ff-only origin main && git checkout "$orig_ref"
+root=$(git rev-parse --show-toplevel)
+if ! git worktree list --porcelain | grep -qx 'branch refs/heads/public'; then
+  git -C "$root" worktree add .worktree-public public
+fi
+cd "$root/.worktree-public"
 git read-tree --reset -u main
 git diff --stat
-# if the diff is broad, split into a few clean commits by change group
 git add -A
-git commit -m "<type>: <describe the real changes from git diff>"
+git commit -m "<type>: <actual change>"
 git push origin public
-cd -
-git worktree remove ../public-sync
 ```
 
 ## DESCRIPTION
 
-Keeps `public` history clean: content matches `main`, but commits stay on `public`.
+`public` gets `main`'s files. Its commits stay separate. Use `.worktree-public`; keep it for later syncs. Never create another `public` checkout.
 
-Always do this in a separate worktree rooted on `public` so `main` and your primary working tree are not disturbed.
+`read-tree --reset -u main` replaces tracked files and index with `main` while `HEAD` remains `public`.
 
-Before doing any write operations, sync local refs:
-
-```bash
-git fetch --all --prune
-orig_ref=$(git symbolic-ref --quiet --short HEAD || git rev-parse --short HEAD)
-git checkout main
-git pull --ff-only origin main
-git checkout "$orig_ref"
-```
-
-`git read-tree --reset -u main` resets index + working tree to `main`'s tree (tracked files), while leaving `HEAD` on `public`.
-
-When writing commit messages, inspect the diff first (`git diff --stat` and/or `git diff`) and name commits for what actually changed.
-
-Use commit type prefixes (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`).
-
-If changes are small and cohesive, use one commit. If changes are huge or mixed across unrelated areas, split into a few clean commits (for example: one for docs, one for skill updates, one for scripts).
-
-## EXAMPLES
-
-```bash
-git fetch --all --prune
-orig_ref=$(git symbolic-ref --quiet --short HEAD || git rev-parse --short HEAD)
-git checkout main
-git pull --ff-only origin main
-git checkout "$orig_ref"
-git worktree add ../public-sync public
-cd ../public-sync
-git checkout public
-git read-tree --reset -u main
-
-# one cohesive change
-git add push-public/SKILL.md
-git commit -m "docs: update push-public workflow notes"
-
-# second cohesive change when needed
-git add AGENTS.md
-git commit -m "chore: align push-public commit conventions"
-
-git push origin public
-cd -
-git worktree remove ../public-sync
-```
+Inspect `git diff` before committing. Use `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, or `test:`. One cohesive change: one commit. Mixed changes: split commits.

@@ -41,8 +41,8 @@ instruction_template=$(cat <<INSTR
 [developer] Finish the merge manually with the steps below.
 
 Context:
-- Worktree path: ${git_worktree_path} — branch ${current_branch_val} @ ${current_sha_val}, status ${worktree_status_val}
-- Repo root path: ${git_root_val} — target ${default_branch_line_val} checkout, status ${repo_status_val}
+- Worktree path: ${git_worktree_path} - branch ${current_branch_val} @ ${current_sha_val}, status ${worktree_status_val}
+- Repo root path: ${git_root_val} - target ${default_branch_line_val} checkout, status ${repo_status_val}
 
 NOTE: Each command runs in its own shell. \`/merge\` switches the working directory to the repo root; use \`git -C <path> ...\` or \`cd <path> && ...\` whenever you need to operate in a different directory.
 

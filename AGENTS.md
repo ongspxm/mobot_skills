@@ -1,49 +1,21 @@
-# AGENTS
-
-## Design Notes
-- For any `botbot-xxx` skill, the default runtime config file location must be under `~/.botbot`.
-- Follow the existing convention: `~/.botbot/<skill-name>.json` (for example, `~/.botbot/botbot-gcal.json`).
+# Design Notes
 - If a `--config` flag is provided, that explicit path still takes precedence.
 - Code style: if a function is only used in one place, inline it; keep code clean, tight, and terse.
 - Styling requirement: prefer low abstraction; avoid unnecessary helper layers and keep implementations direct.
 - Write each skill `SKILL.md` in man-page style (for example: `NAME`, `SYNOPSIS`, `DESCRIPTION`, `EXAMPLES`).
 
-## fdocs + some misc setup
-### fdocs lifecycle
-fdocs are tracked in `docs/fdocs/`. Each FD has a dedicated file (`fdYYYYMMDD-HHMMSS-xxxx_title.md`) and `docs/fdocs/_INDEX.md` is generated from FD file frontmatter.
-- `closed`: `closed` date is set
-- `planned`: `planned` date is set and `closed` is empty
-- `open`: `active=true` and `planned`/`closed` are empty
-- `backlog`: default when none of the above apply
+# Deprecated skills
+- for skill that are no longer maintained, they will be moved to the DEPRECATED directory.
+- they are NOT MEANT TO BE TOUCHED
 
-### fdocs commands
-- fdocs init: initialize docs/fdocs/ scaffolding and seed templates
-- fdocs new: create a new fdocs using template
-- fdocs status: regenerate index and show active docs
-- fdocs status --grooming: move closed docs into docs/fdocs/archive/
-- fdocs close: close and archive a specific FD
-- fdocs explore: print fdocs status plus recent repo activity
-- fdocs verify: workflow to run verification on a fdoc
-- fdocs deep: workflow to do research for a fdoc
+# skill-prefix
+## botbot
+- For any `botbot-xxx` skill, the default runtime config file location must be under `~/.botbot`.
+- Follow the existing convention: `~/.botbot/<skill-name>.json` (for example, `~/.botbot/botbot-gcal.json`).
 
-### fdocs conventions
-- fdocs files: `docs/fdocs/fdYYYYMMDD-HHMMSS-xxxx_title.md` (timestamp + random suffix)
-- Archive: `docs/fdocs/archive/`
-- Source of truth: fdocs files (index is derived output)
-- Date format: `YYYY-MM-DD` for `planned` and `closed`
+## meagent
+- `meagent-xxx` skills are reserved for the meagent bot, a bulter service bot.
+- each skill should represent one task, and the task name should be the skill name.
 
-### misc dev guide
-Keep long-lived engineering rules in `docs/dev_guide/` and keep `AGENTS.md` concise.
-Before doing anything, do a ls on the directory to see what rules are in place.
-- Source of truth: `docs/dev_guide/*.md` (`README.md` is the index)
-- Add one short section per rule with: intent, hard requirement, examples
-- Prefer project-specific rules over generic style guidance
-- If a rule changes behavior across the codebase, update the relevant FD and mention the rule id/title
-
-### misc Inline Annotations (`%%`)
-- Treat each `%%` line as a direct user instruction.
-- Address every `%%` line, then remove it.
-- If any `%%` instruction is ambiguous, ask for clarification before editing.
-
-### misc git worktree
-- keep all git worktrees in "(repo root)/.worktree"
+# user AGENTS.md
+USER.AGENTS.md is meant to be saved at the user's home directory, and loaded in all repos and subdirs
