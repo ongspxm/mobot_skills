@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "piWeb": {
+    "plugins": [
+      {
+        "id": "panel-resize",
+        "module": "pi-web-plugin.js"
+      }
+    ]
+  }
+}
