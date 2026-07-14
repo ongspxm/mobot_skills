@@ -3,20 +3,14 @@ name: botbot-gtask
 description: Use when you need to list Google Task lists, list tasks in a specific list, or add a task (whitelist enforced) via a lightweight JSON-configured CLI.
 ---
 
-# BOTBOT-GTASK(1)
+# Botbot Google Tasks
 
-## NAME
-
-`botbot-gtask` - lightweight Google Tasks CLI for listing task lists, listing tasks, adding tasks, and token refresh.
-
-## SYNOPSIS
-
+## Workflows
 ```bash
 uv run <path-to-skill>/scripts/botbot_gtask.py [--config /path/to/botbot-gtask.json] <command> [args]
 ```
 
-## DESCRIPTION
-
+## When to Use
 Supports:
 - `ls` (list task lists)
 - `tasks --list <title-or-id>` (list tasks in a task list)
@@ -25,8 +19,7 @@ Supports:
 
 If `--list` is omitted for `add`, the first list from `ls` is used.
 
-## IMPORTANT
-
+## Boundaries
 - Always run with `uv run`.
 - `add` is always gated by `edit_whitelist`.
 - OAuth scopes checked by `refresh`:
@@ -36,8 +29,7 @@ If `--list` is omitted for `add`, the first list from `ls` is used.
 - Refreshed token data is persisted back to the same config JSON.
 - `refresh` can trigger interactive OAuth re-consent if required scopes are missing.
 
-## CONFIG
-
+## Configuration
 Config path precedence:
 1. `--config /path/to/botbot-gtask.json`
 2. `$BOTBOT_HOME/botbot-gtask.json`
@@ -62,8 +54,7 @@ Example: `assets/botbot-gtask.example.json`
 }
 ```
 
-## EXAMPLES
-
+## Examples
 ```bash
 uv run <path-to-skill>/scripts/botbot_gtask.py ls
 uv run <path-to-skill>/scripts/botbot_gtask.py tasks --list "Personal"
@@ -73,7 +64,6 @@ uv run <path-to-skill>/scripts/botbot_gtask.py refresh
 uv run <path-to-skill>/scripts/botbot_gtask.py --config ~/.botbot/botbot-gtask.json ls
 ```
 
-## FILES
-
+## Resources
 - Entrypoint: `scripts/botbot_gtask.py`
 - Replace `<path-to-skill>` with your installed skill path (for example `~/.code/skills/botbot-gtask`).

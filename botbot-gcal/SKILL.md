@@ -3,27 +3,20 @@ name: botbot-gcal
 description: Use when you need to list Google Calendar events in a time range across configured calendars, or add a calendar event to primary calendar via a lightweight JSON-configured CLI.
 ---
 
-# BOTBOT-GCAL(1)
+# Botbot Google Calendar
 
-## NAME
-
-`botbot-gcal` - lightweight Google Calendar CLI for listing events, adding events, and token refresh.
-
-## SYNOPSIS
-
+## Workflows
 ```bash
 uv run <path-to-skill>/scripts/botbot_gcal.py [--config /path/to/botbot-gcal.json] <command> [args]
 ```
 
-## DESCRIPTION
-
+## When to Use
 Supports:
 - `ls <start> <end>` (inclusive range across configured calendars) - ALWAYS run with raw_output=True
 - `add <start> <end> <title>` (always inserts into `primary` calendar)
 - `refresh` (refresh token and validate required scope)
 
-## IMPORTANT
-
+## Boundaries
 - Always run with `uv run`.
 - `ls` returns workflow-style text lines, not raw JSON.
 - `default_timezone` controls input/output timestamp interpretation and rendering.
@@ -32,8 +25,7 @@ Supports:
 - Refreshed token data is persisted back to the same config JSON.
 - `refresh` checks scope `https://www.googleapis.com/auth/calendar` and can trigger interactive OAuth re-consent.
 
-## CONFIG
-
+## Configuration
 Config path precedence:
 1. `--config /path/to/botbot-gcal.json`
 2. `$BOTBOT_HOME/botbot-gcal.json`
@@ -59,8 +51,7 @@ Example: `assets/botbot-gcal.example.json`
 }
 ```
 
-## EXAMPLES
-
+## Examples
 ```bash
 uv run <path-to-skill>/scripts/botbot_gcal.py ls 2026-02-22 2026-02-23
 uv run <path-to-skill>/scripts/botbot_gcal.py add 2026-02-22T09:00:00Z 2026-02-22T09:30:00Z "Standup"
@@ -68,7 +59,6 @@ uv run <path-to-skill>/scripts/botbot_gcal.py refresh
 uv run <path-to-skill>/scripts/botbot_gcal.py --config ~/.botbot/botbot-gcal.json ls 2026-02-22 2026-02-23
 ```
 
-## FILES
-
+## Resources
 - Entrypoint: `scripts/botbot_gcal.py`
 - Replace `<path-to-skill>` with your installed skill path (for example `~/.code/skills/botbot-gcal`).

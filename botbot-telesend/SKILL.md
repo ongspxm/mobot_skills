@@ -1,22 +1,19 @@
 ---
 name: botbot-telesend
-description: Send Telegram messages with optional image batches through a bot token.
+description: Use when you need to send Telegram text or optional image batches through a bot token.
 ---
 
-# BOTBOT-TELESEND(1)
+# Botbot Telegram Send
 
-## NAME
-
+## Overview
 `botbot-telesend` - tiny Telegram sender CLI for text and high-resolution image uploads.
 
-## SYNOPSIS
-
+## Workflows
 ```bash
 uv run <path-to-skill>/scripts/botbot_telesend.py send (--text "hello" | --textfile ./message.txt) [--img file1.jpg --img file2.jpg ...]
 ```
 
-## DESCRIPTION
-
+## When to Use
 Sends a Telegram bot message to the configured default chat.
 
 - Uses `sendMessage` when no `--img` flags are supplied.
@@ -33,8 +30,7 @@ Required config keys:
 - `bottkn`: Telegram bot token.
 - `chatid`: target chat id (for example `-1001234567890`).
 
-## EXAMPLES
-
+## Examples
 ```bash
 uv run <path-to-skill>/scripts/botbot_telesend.py send --text "daily update"
 ```
@@ -47,7 +43,6 @@ uv run <path-to-skill>/scripts/botbot_telesend.py send --textfile ./message.txt 
 uv run <path-to-skill>/scripts/botbot_telesend.py send --text "look" --img ./a.jpg --img ./b.jpg
 ```
 
-## FILES
-
+## Resources
 - Entrypoint: `scripts/botbot_telesend.py`
 - Example config: `assets/botbot-telesend.example.json`
