@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "piWeb": {
+    "plugins": [
+      { "id": "terminal-hotkeys", "module": "pi-web-plugin.js" }
+    ]
+  }
+}
