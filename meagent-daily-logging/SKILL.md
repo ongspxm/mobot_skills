@@ -3,20 +3,14 @@ name: meagent-daily-logging
 description: Use when you need stage-1 Telegram daily logging into monthly markdown files.
 ---
 
-# MEAGENT-DAILY-LOGGING(1)
+# Meagent Daily Logging
 
-## NAME
-
-`meagent-daily-logging` - pull Telegram text from configured chats and write `(tag) message` lines into monthly markdown logs.
-
-## SYNOPSIS
-
+## Workflows
 ```bash
 uv run --with=telethon <path-to-skill>/scripts/meagent_daily_logging.py run [--date YYYY-MM-DD] [--config /path/to/config.json]
 ```
 
-## DESCRIPTION
-
+## When to Use
 - Uses Telethon bot-token auth (`api_id`, `api_hash`, `bot_token`).
 - Reads config from `~/.botbot/meagent-daily-logging.json`.
 - `--config` can override the default config path.
@@ -28,8 +22,7 @@ uv run --with=telethon <path-to-skill>/scripts/meagent_daily_logging.py run [--d
 - If `--date` is not provided, it processes the previous local day.
 - Prints logged lines to stdout.
 
-## CONFIG
-
+## Configuration
 JSON object in `~/.botbot/meagent-daily-logging.json`:
 
 - `api_id` (required)
@@ -55,8 +48,7 @@ Example:
 }
 ```
 
-## EXAMPLES
-
+## Examples
 ```bash
 # Default: previous local day
 uv run --with=telethon <path-to-skill>/scripts/meagent_daily_logging.py run

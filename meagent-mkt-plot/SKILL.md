@@ -3,20 +3,14 @@ name: meagent-mkt-plot
 description: Use when you need daily multi-horizon market comparison charts with normalized lines and CSV summary metrics.
 ---
 
-# MEAGENT-MKT-PLOT(1)
+# Meagent Market Plot
 
-## NAME
-
-`meagent-mkt-plot` - generate one normalized 4-panel market chart per configured tag and emit a deterministic CSV ticker summary.
-
-## SYNOPSIS
-
+## Workflows
 ```bash
 uv run --with=yfinance --with=matplotlib <path-to-skill>/scripts/meagent_mkt_plot.py run
 ```
 
-## DESCRIPTION
-
+## When to Use
 - Reads groups from `~/.botbot/meagent-mkt-plot.json`.
 - Generates one PNG chart per tag/group in `/tmp`.
 - Each chart has 4 subplots: `1w`, `4w`, `12w`, `52w`.
@@ -37,13 +31,8 @@ uv run --with=yfinance --with=matplotlib <path-to-skill>/scripts/meagent_mkt_plo
   - missing panel/window data is skipped with warning
   - run fails only when no ticker has valid daily data
 
-## CONFIG
-
-Config shape is a JSON object mapping `tag -> [tickers...]`.
-
-Path:
-
-- `~/.botbot/meagent-mkt-plot.json`
+## Configuration
+JSON `tag -> [tickers...]` at `~/.botbot/meagent-mkt-plot.json`.
 
 Example:
 
@@ -56,15 +45,9 @@ Example:
 }
 ```
 
-How to control plotted assets:
+Add/remove tags for chart groups and tickers for lines; rename a tag to change its output filename prefix.
 
-- Add/remove a tag key to control chart grouping.
-- Add/remove tickers inside each tag array to control plotted lines.
-- Rename tag key to change output chart filename prefix.
-
-## EXAMPLES
-
+## Examples
 ```bash
-# Reads default config path (~/.botbot/meagent-mkt-plot.json)
 uv run --with=yfinance --with=matplotlib <path-to-skill>/scripts/meagent_mkt_plot.py run
 ```
