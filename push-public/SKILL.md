@@ -3,14 +3,9 @@ name: push-public
 description: Publish main's tree on public as clean commits, without main history.
 ---
 
-# PUSH-PUBLIC(1)
+# Push Public
 
-## NAME
-
-`push-public` — snapshot `main` content onto `public`.
-
-## SYNOPSIS
-
+## Workflows
 ```bash
 git fetch --all --prune
 orig_ref=$(git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
@@ -27,8 +22,7 @@ git commit -m "<type>: <actual change>"
 git push origin public
 ```
 
-## DESCRIPTION
-
+## When to Use
 `public` gets `main`'s files. Its commits stay separate. Use `.worktree-public`; keep it for later syncs. Never create another `public` checkout.
 
 `read-tree --reset -u main` replaces tracked files and index with `main` while `HEAD` remains `public`.

@@ -3,20 +3,14 @@ name: merge-worktree
 description: Merge or cherry-pick a worktree branch back into the repo root using a single renderer script.
 ---
 
-# MERGE-WORKTREE(1)
+# Merge Worktree
 
-## NAME
-
-`merge-worktree` - merge or cherry-pick worktree changes back into repo root using rendered instructions.
-
-## SYNOPSIS
-
+## Workflows
 ```bash
 bash <path-to-skill>/render-instructions.sh
 ```
 
-## DESCRIPTION
-
+## When to Use
 Use when a worktree branch must be integrated into the default branch at repo root.
 
 Workflow:
@@ -27,11 +21,9 @@ Workflow:
 5. Confirm clean `git status`.
 6. Remove the worktree shown in instructions (never the repo root).
 
-## IMPORTANT
-
+## Boundaries
 - Follow rendered steps exactly.
 - Do not skip the final cleanup of the target worktree.
 
-## FILES
-
+## Resources
 - Helper script: `render-instructions.sh`

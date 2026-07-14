@@ -3,22 +3,24 @@ name: marimo
 description: Use when writing or fixing marimo notebook scripts.
 ---
 
-# NAME
+# Marimo Notebooks
+
+## Overview
 marimo - build compact, valid marimo notebooks
 
-# SYNOPSIS
+## Workflows
 Use for `.py` marimo notebooks with reactive cells, UI, state, or DAG errors.
 
-# LINKS
+## Resources
 - marimo docs: https://docs.marimo.io/
 - official marimo skill: https://github.com/marimo-team/skills/blob/main/skills/marimo-notebook/SKILL.md
 
-# DESCRIPTION
+## When to Use
 marimo notebooks are Python files. Cells form a DAG from names they define and consume.
 
 Keep notebooks simple. One global name, one owner cell. Use local `_scratch` names for temp work.
 
-# RULES
+## Boundaries
 - No duplicate globals. Same global name in two cells raises `DuplicateNameError`.
 - Cell args are injected by marimo from matching globals. Do not call cell funcs by hand.
 - Each cell is `@app.cell` and returns the globals it exports.
@@ -28,7 +30,7 @@ Keep notebooks simple. One global name, one owner cell. Use local `_scratch` nam
 - Use `mo.state(initial)` for persistent interactive state.
 - Layout: `mo.hstack([...])` for rows, `mo.vstack([...])` for columns.
 
-# PATTERN
+## Examples
 Compact full pattern: setup, globals, locals, UI, state, button, reactive output, layout.
 
 ```python

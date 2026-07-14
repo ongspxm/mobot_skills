@@ -1,24 +1,18 @@
 ---
 name: setup-precommit
-description: set up pre-commit for a repo
+description: Use when you need to set up or configure pre-commit hooks for a repository.
 ---
 
-# SETUP-PRECOMMIT(1)
+# Set Up Pre-commit
 
-## NAME
-
-`setup-precommit` - initialize and configure `pre-commit` hooks for a repository.
-
-## SYNOPSIS
-
+## Workflows
 ```bash
 # run from git root
 pipx install pre-commit  # if missing
 pre-commit run --all-files
 ```
 
-## DESCRIPTION
-
+## When to Use
 Workflow:
 1. Detect git root and run all steps there.
 2. Inspect repo languages.
@@ -26,8 +20,7 @@ Workflow:
 4. Create/update `.pre-commit-config.yaml`.
 5. Validate config by running pre-commit before committing.
 
-## IMPORTANT
-
+## Boundaries
 - Always include JSON and YAML formatting hooks from `pre-commit-hooks`.
 - Never install `codespell`.
 - For Python, use only `astral-sh/ruff-pre-commit` with `ruff-check --fix` and `ruff-format`.
@@ -36,8 +29,7 @@ Workflow:
 - Add gitignore override for `.pre-commit-config.yaml` so the file is pushed.
 - Do not modify `.gitignore` in any other way.
 
-## SOURCES
-
+## Resources
 - `https://pre-commit.com/`
 - `https://github.com/pre-commit/pre-commit-hooks/blob/main/.pre-commit-hooks.yaml`
 - `https://github.com/astral-sh/ruff-pre-commit`
