@@ -2,7 +2,8 @@
 - If a `--config` flag is provided, that explicit path still takes precedence.
 - Code style: if a function is only used in one place, inline it; keep code clean, tight, and terse.
 - Styling requirement: prefer low abstraction; avoid unnecessary helper layers and keep implementations direct.
-- Write each skill `SKILL.md` in man-page style (for example: `NAME`, `SYNOPSIS`, `DESCRIPTION`, `EXAMPLES`).
+- Write concise, task-oriented `SKILL.md` files. Follow [the skill-authoring guide](docs/skill-authoring.md).
+- IMPT: make sure oni ascii chars in all the files
 
 # Deprecated skills
 - for skill that are no longer maintained, they will be moved to the DEPRECATED directory.
@@ -19,3 +20,6 @@
 
 # user AGENTS.md
 USER.AGENTS.md is meant to be saved at the user's home directory, and loaded in all repos and subdirs
+
+# pi settings
+pi.settings.json should be appended to ~/.pi/agents/settings.json as some sanes defaults

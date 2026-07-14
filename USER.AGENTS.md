@@ -37,8 +37,13 @@ Compact: Check request payload. Client may send wrong field name. Server expects
 - HACKY: temporary fix
 
 ## commit msg conventions
-- commit msg should be self-explanatory, compact. component name is project specific
-- "[fix/feat](component_name) desc" eg "fix(auth) fix login redirect"
+- Commit msg: self-explanatory, compact. Component name is project specific.
+- Format: `type: (component) description`. Example: `fix: (auth) fix login redirect`.
+- Common types:
+  - `feat`: new user-facing capability
+  - `fix`: bug correction
+  - `chore`: maintenance, tooling, dependency, or non-product work
+  - `docs`: documentation-only change
 
 ## git worktree
 - keep all git worktrees in "$REPOROOT/.worktree-branchname"
