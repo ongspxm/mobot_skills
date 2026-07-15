@@ -1,17 +1,10 @@
 {
-  "api": {
-    "base_url": "https://tasks.googleapis.com/tasks/v1",
-    "token_url": "https://oauth2.googleapis.com/token"
-  },
   "edit_whitelist": [
     "Personal",
     "work-list-id"
   ],
-  "tokens": {
-    "access_token": "ya29.example-access-token",
-    "client_id": "example.apps.googleusercontent.com",
-    "client_secret": "example-client-secret",
-    "expiry": "2026-02-22T10:00:00Z",
-    "refresh_token": "1//example-refresh-token"
+  "gog": {
+    "account": "you@example.com",
+    "client": "your-client-name"
   }
 }

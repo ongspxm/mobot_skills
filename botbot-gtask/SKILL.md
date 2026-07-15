@@ -1,6 +1,6 @@
 ---
 name: botbot-gtask
-description: Use when you need to list Google Task lists, list tasks in a specific list, or add a task (whitelist enforced) via a lightweight JSON-configured CLI.
+description: Use when you need to list Google Task lists, list tasks in a specific list, or add a task (whitelist enforced) through gog.
 ---
 
 # Botbot Google Tasks
@@ -13,21 +13,17 @@ uv run <path-to-skill>/scripts/botbot_gtask.py [--config /path/to/botbot-gtask.j
 ## When to Use
 Supports:
 - `ls` (list task lists)
-- `tasks --list <title-or-id>` (list tasks in a task list)
+- `tasks [--list <title-or-id>]` (list incomplete tasks in a task list; defaults to the first list)
 - `add --title <title> --notes <notes> [--list <title-or-id>]` (create task)
-- `refresh` (refresh token and validate required scopes)
 
 If `--list` is omitted for `add`, the first list from `ls` is used.
 
 ## Boundaries
 - Always run with `uv run`.
+- Requires `gog` with Google Tasks access for the selected account and client.
+- gog owns OAuth client setup, consent, token storage, and token refresh.
+- The command passes `--no-input`; configure gog before use.
 - `add` is always gated by `edit_whitelist`.
-- OAuth scopes checked by `refresh`:
-  `https://www.googleapis.com/auth/tasks` and
-  `https://www.googleapis.com/auth/tasks.readonly`.
-- Expired `access_token` auto-refreshes when `refresh_token`, `client_id`, and `client_secret` are present.
-- Refreshed token data is persisted back to the same config JSON.
-- `refresh` can trigger interactive OAuth re-consent if required scopes are missing.
 
 ## Configuration
 Config path precedence:
@@ -39,28 +35,21 @@ Example: `assets/botbot-gtask.example.json`
 
 ```json
 {
-  "edit_whitelist": ["Personal", "work-list-id"],
-  "api": {
-    "base_url": "https://tasks.googleapis.com/tasks/v1",
-    "token_url": "https://oauth2.googleapis.com/token"
+  "gog": {
+    "account": "you@example.com",
+    "client": "your-client-name"
   },
-  "tokens": {
-    "access_token": "ya29...",
-    "refresh_token": "1//...",
-    "client_id": "...apps.googleusercontent.com",
-    "client_secret": "...",
-    "expiry": "2026-02-22T10:00:00Z"
-  }
+  "edit_whitelist": ["Personal", "work-list-id"]
 }
 ```
 
 ## Examples
 ```bash
 uv run <path-to-skill>/scripts/botbot_gtask.py ls
+uv run <path-to-skill>/scripts/botbot_gtask.py tasks
 uv run <path-to-skill>/scripts/botbot_gtask.py tasks --list "Personal"
 uv run <path-to-skill>/scripts/botbot_gtask.py add --list "Personal" --title "Buy milk" --notes "2 liters"
 uv run <path-to-skill>/scripts/botbot_gtask.py add --title "Buy milk" --notes "2 liters"
-uv run <path-to-skill>/scripts/botbot_gtask.py refresh
 uv run <path-to-skill>/scripts/botbot_gtask.py --config ~/.botbot/botbot-gtask.json ls
 ```
 
