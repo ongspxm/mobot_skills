@@ -174,7 +174,8 @@ class GmailClient:
         data = self._run_gog_json("gmail", "thread", "get", tid, "--full")
         if not isinstance(data, dict):
             raise CliError("unexpected response from gog gmail thread get")
-        text = self._plaintext(self._latest_message(data)).strip()
+        thread = data.get("thread") if isinstance(data.get("thread"), dict) else data
+        text = self._plaintext(self._latest_message(thread)).strip()
         if not text:
             raise CliError("unable to extract body from latest message")
         return text
