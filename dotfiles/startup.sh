@@ -2,6 +2,7 @@
 
 set -o vi
 export EDITOR=vim
+command -v fzf >/dev/null && eval "$(fzf --bash)"
 
 # piweb web term works better when tmux is doing the buffering
 tmux0() {
