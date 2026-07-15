@@ -1,9 +1,9 @@
 {
-  "url": "https://gitlab.com",
-  "project_id": "12345678",
-  "token": "pipeline-trigger-token",
-  "private_token": "optional-private-token-for-status-polling",
-  "ref": "main",
   "poll_interval_seconds": 5,
-  "timeout_seconds": 600
+  "private_token": "optional-private-token-for-status-polling",
+  "project_id": "12345678",
+  "ref": "main",
+  "timeout_seconds": 600,
+  "token": "pipeline-trigger-token",
+  "url": "https://gitlab.com"
 }

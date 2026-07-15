@@ -1,23 +1,37 @@
 {
-    "hideThinkingBlock": false,
-    "theme": "dark",
-    "enableSkillCommands": true,
-    "packages": [
-        "npm:pi-subagents",
-        "npm:pi-web-access",
-        "npm:remote-pi",
-        "npm:pi-cursor-sdk",
-        "npm:pi-hermes-memory"
-    ],
-    "subagents": {
-        "agentOverrides": {
-            "scout": { "thinking": "low" },
-            "context-builder": { "thinking": "low" },
-            "researcher": { "thinking": "low" },
-            "worker": { "thinking": "medium" },
-            "planner": { "thinking": "medium" },
-            "reviewer": { "thinking": "medium" },
-            "oracle": { "thinking": "medium" }
-        }
+  "enableSkillCommands": true,
+  "hideThinkingBlock": false,
+  "packages": [
+    "npm:pi-subagents",
+    "npm:pi-web-access",
+    "npm:remote-pi",
+    "npm:pi-cursor-sdk",
+    "npm:pi-hermes-memory"
+  ],
+  "subagents": {
+    "agentOverrides": {
+      "context-builder": {
+        "thinking": "low"
+      },
+      "oracle": {
+        "thinking": "medium"
+      },
+      "planner": {
+        "thinking": "medium"
+      },
+      "researcher": {
+        "thinking": "low"
+      },
+      "reviewer": {
+        "thinking": "medium"
+      },
+      "scout": {
+        "thinking": "low"
+      },
+      "worker": {
+        "thinking": "medium"
+      }
     }
+  },
+  "theme": "dark"
 }

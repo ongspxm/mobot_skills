@@ -1,9 +1,12 @@
 {
   "name": "pi-web-panel-swap",
-  "private": true,
   "piWeb": {
     "plugins": [
-      { "id": "panel-swap", "module": "pi-web-plugin.js" }
+      {
+        "id": "panel-swap",
+        "module": "pi-web-plugin.js"
+      }
     ]
-  }
+  },
+  "private": true
 }

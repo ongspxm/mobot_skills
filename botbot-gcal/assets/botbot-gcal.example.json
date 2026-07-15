@@ -1,19 +1,19 @@
 {
-  "default_timezone": "+8",
+  "api": {
+    "base_url": "https://www.googleapis.com/calendar/v3",
+    "token_url": "https://oauth2.googleapis.com/token"
+  },
   "default_calendars": [
     "primary",
     "work@example.com",
     "Team Calendar"
   ],
-  "api": {
-    "base_url": "https://www.googleapis.com/calendar/v3",
-    "token_url": "https://oauth2.googleapis.com/token"
-  },
+  "default_timezone": "+8",
   "tokens": {
     "access_token": "ya29...",
-    "refresh_token": "1//...",
     "client_id": "...apps.googleusercontent.com",
     "client_secret": "...",
-    "expiry": "2026-02-22T10:00:00Z"
+    "expiry": "2026-02-22T10:00:00Z",
+    "refresh_token": "1//..."
   }
 }

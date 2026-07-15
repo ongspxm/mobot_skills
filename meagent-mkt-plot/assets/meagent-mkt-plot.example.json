@@ -1,6 +1,22 @@
 {
-  "benchmarks": ["^GSPC", "^IXIC", "^VIX"],
-  "sectors": ["XLK", "XLF", "XLE"],
-  "crypto": ["BTC-USD", "ETH-USD", "SOL-USD"],
-  "macro": ["^TNX", "DX-Y.NYB", "GC=F"]
+  "benchmarks": [
+    "^GSPC",
+    "^IXIC",
+    "^VIX"
+  ],
+  "crypto": [
+    "BTC-USD",
+    "ETH-USD",
+    "SOL-USD"
+  ],
+  "macro": [
+    "^TNX",
+    "DX-Y.NYB",
+    "GC=F"
+  ],
+  "sectors": [
+    "XLK",
+    "XLF",
+    "XLE"
+  ]
 }

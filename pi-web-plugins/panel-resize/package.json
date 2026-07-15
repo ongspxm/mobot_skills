@@ -1,5 +1,4 @@
 {
-  "private": true,
   "piWeb": {
     "plugins": [
       {
@@ -7,5 +6,6 @@
         "module": "pi-web-plugin.js"
       }
     ]
-  }
+  },
+  "private": true
 }
