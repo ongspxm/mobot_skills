@@ -6,7 +6,8 @@ command -v fzf >/dev/null && eval "$(fzf --bash)"
 
 # piweb web term works better when tmux is doing the buffering
 tmux0() {
-    tmux new-session -As "$(basename "$PWD")-$(printf %s "$PWD" | md5sum | cut -c -7)"
+    pwd0=$(realpath .)
+    tmux new-session -As "$(basename "$pwd0")-$(printf %s "$pwd0" | md5sum | cut -c -7)"
 }
 [[ $IS_PIWEB == "1" ]] && tmux0
 
