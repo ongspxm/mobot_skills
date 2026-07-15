@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-07-15
+- (create) Added 2026-07-15-use-gog-for-google-automation.md to standardize Google automation skills on gog.
+
 ## 2026-07-12
 - (create) Added 2026-07-12-move-skills-away-from-manpage-format.md to replace the manpage skill format with concise task-oriented guidance.
 
