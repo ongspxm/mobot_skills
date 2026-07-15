@@ -2,6 +2,7 @@
 import argparse
 import json
 import re
+from datetime import datetime
 import subprocess
 import sys
 from pathlib import Path
@@ -94,7 +95,7 @@ def _collect() -> tuple[list[str], dict[str, str]]:
             raise CliError("botbot-gmail ls returned non-NDJSON output") from exc
         if isinstance(row, dict):
             rows.append(row)
-    rows.sort(key=lambda r: int(r.get("tstamp") or 0), reverse=True)
+    rows.sort(key=lambda row: datetime.fromisoformat(str(row["tstamp"])).timestamp(), reverse=True)
 
     tids: list[str] = []
     items: dict[str, str] = {}
