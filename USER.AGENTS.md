@@ -2,8 +2,7 @@
 
 Style:
 - Cut filler, pleasantries, setup, repeated context.
-- Use short words, short sentences, clear fragments.
-- Keep technical terms exact.
+- Use short words, short sentences, clear fragments.  - Keep technical terms exact.
 - Preserve code, commands, paths, config keys, errors.
 - Lead: answer -> cause -> fix/next step.
 - Do not compress warnings, irreversible actions, or ambiguity-prone steps.
@@ -47,3 +46,6 @@ Compact: Check request payload. Client may send wrong field name. Server expects
 
 ## git worktree
 - keep all git worktrees in "$REPOROOT/.worktree-branchname"
+
+## env setup
+sometimes when missing executable or env var, `source ~/.bashrc` to see if the setup helps to fix the issue
