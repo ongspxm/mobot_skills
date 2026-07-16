@@ -9,7 +9,6 @@ tmux0() {
     pwd0=$(realpath .)
     tmux new-session -As "$(basename "$pwd0")-$(printf %s "$pwd0" | md5sum | cut -c -7)"
 }
-[[ $IS_PIWEB == "1" ]] && tmux0
 
 # git stuffz
 alias gitpush="git pull --rebase && git push"
