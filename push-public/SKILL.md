@@ -15,11 +15,13 @@ if ! git worktree list --porcelain | grep -qx 'branch refs/heads/public'; then
   git -C "$root" worktree add .worktree-public public
 fi
 cd "$root/.worktree-public"
+before=$(git rev-parse HEAD)
 git read-tree --reset -u main
 git diff --stat
 git diff
 # read full diff, then group+commit (below); push when done
 git push origin public
+git log --oneline "$before..HEAD" # commits created
 ```
 
 ## When to Use
