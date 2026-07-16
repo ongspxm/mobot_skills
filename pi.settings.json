@@ -2,40 +2,10 @@
   "enableSkillCommands": true,
   "hideThinkingBlock": false,
   "packages": [
-    "npm:pi-subagents",
-    "npm:pi-web-access",
-    "npm:remote-pi",
-    "npm:pi-cursor-sdk",
-    "npm:pi-hermes-memory",
     "npm:@schultzp2020/pi-cursor",
     "npm:pi-web-surf",
     "npm:@marks/pi-subagent",
     "npm:@the-agency/pi-hashline-edit"
   ],
-  "subagents": {
-    "agentOverrides": {
-      "context-builder": {
-        "thinking": "low"
-      },
-      "oracle": {
-        "thinking": "medium"
-      },
-      "planner": {
-        "thinking": "medium"
-      },
-      "researcher": {
-        "thinking": "low"
-      },
-      "reviewer": {
-        "thinking": "medium"
-      },
-      "scout": {
-        "thinking": "low"
-      },
-      "worker": {
-        "thinking": "medium"
-      }
-    }
-  },
   "theme": "dark"
 }
