@@ -25,6 +25,7 @@ Do not remove unless asked:
 - Compact and self-explanatory.
 - Format: `type: (component) description`
 - Types: `feat`, `fix`, `chore`, `docs`.
+- Split commits by cohesive concern. Stage only the files or hunks that belong to each commit; avoid one-file-per-commit when files share a concern.
 
 ## Git worktrees
 Keep worktrees in `$REPOROOT/.worktree-branchname`.

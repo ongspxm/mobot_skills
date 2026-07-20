@@ -29,4 +29,4 @@ git log --oneline "$before..HEAD" # commits created
 
 `read-tree --reset -u main` replaces tracked files and index with `main` while `HEAD` remains `public`.
 
-Always read the full `git diff` (not just `--stat`) before any commit; do not invent messages from filenames. Split by cohesive concern with path-scoped `git add` — prefer docs, then config/tooling, then one skill/feature area, then leftover chore. One concern = one commit (`feat:`/`fix:`/`chore:`/`docs:`/`refactor:`/`test:`); message must match that commit's diff. Do not one-file-per-commit when files share a concern; `git add -A` only when the whole remaining diff is one concern.
+Always read the full `git diff` (not just `--stat`) before any commit; do not invent messages from filenames. Split by cohesive concern: stage only the files or hunks that belong to each commit. Prefer docs, then config/tooling, then one skill/feature area, then leftover chore. One concern = one commit (`feat:`/`fix:`/`chore:`/`docs:`/`refactor:`/`test:`); message must match that commit's diff. Do not one-file-per-commit when files share a concern; `git add -A` only when the whole remaining diff is one concern.
