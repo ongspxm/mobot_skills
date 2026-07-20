@@ -4,8 +4,8 @@
   "packages": [
     "npm:@schultzp2020/pi-cursor",
     "npm:pi-web-surf",
-    "npm:@marks/pi-subagent",
-    "npm:@the-agency/pi-hashline-edit"
+    "npm:@the-agency/pi-hashline-edit",
+    "git:github.com/ongspxm/pi-subagent@tmp"
   ],
   "theme": "dark"
 }
