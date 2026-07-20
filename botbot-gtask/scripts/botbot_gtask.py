@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+NOTES_MAXCHAR = 4000
+
 
 class CliError(RuntimeError):
     pass
@@ -172,8 +174,8 @@ class GoogleTasksClient:
                 raise CliError("draft must have a title on line 1 and a blank line 2")
             if not new_title:
                 raise CliError("task title cannot be empty")
-            if len(new_notes) > 4000:
-                raise CliError("task notes cannot exceed 4000 characters")
+            if len(new_notes) > NOTES_MAXCHAR:
+                raise CliError(f"task notes cannot exceed {NOTES_MAXCHAR} characters")
             if new_title == title and new_notes == notes:
                 print("no changes")
                 return None
@@ -229,22 +231,60 @@ class GoogleTasksClient:
             "list_title": lst["title"],
         }
 
-    def add_task(self, list_name_or_id: str, title: str, description: str) -> dict[str, str]:
+    def add_task(
+        self,
+        list_name_or_id: str | None,
+        title: str | None = None,
+        description: str | None = None,
+    ) -> dict[str, str]:
+        if title is None and description is not None:
+            raise CliError("--notes requires --title")
         lst = self.first_tasklist() if not list_name_or_id else self.resolve_list(list_name_or_id)
         allowed = {str(x).lower() for x in self.edit_whitelist}
         if lst["id"].lower() not in allowed and lst["title"].lower() not in allowed:
             raise CliError(f"list is not in edit_whitelist: {lst['title']} ({lst['id']})")
-        data = self._run_gog_json("tasks", "add", lst["id"], "--title", title, "--notes", description)
-        if not isinstance(data, dict):
-            raise CliError("unexpected response from gog tasks add")
-        return {
-            "id": str(data.get("id", "")),
-            "title": str(data.get("title", "")),
-            "notes": str(data.get("notes", "")),
-            "status": str(data.get("status", "")),
-            "list_id": lst["id"],
-            "list_title": lst["title"],
-        }
+        draft_path: Path | None = None
+        try:
+            if title is None:
+                with tempfile.NamedTemporaryFile(
+                    mode="w", encoding="utf-8", prefix="gog-gtask-", suffix=".txt", delete=False
+                ) as draft:
+                    draft_path = Path(draft.name)
+                draft_path.chmod(0o600)
+                editor = os.getenv("EDITOR") or os.getenv("VISUAL") or "vim"
+                proc = subprocess.run([*shlex.split(editor), str(draft_path)])
+                if proc.returncode != 0:
+                    raise CliError(f"editor exited with status {proc.returncode}")
+                content = draft_path.read_text(encoding="utf-8")
+                title, _, notes = content.partition("\n")
+            else:
+                notes = description or ""
+            if not title:
+                raise CliError("task title cannot be empty")
+            if len(notes) > NOTES_MAXCHAR:
+                raise CliError(f"task notes cannot exceed {NOTES_MAXCHAR} characters")
+            data = self._run_gog_json("tasks", "add", lst["id"], "--title", title, "--notes", notes)
+            if not isinstance(data, dict):
+                raise CliError("unexpected response from gog tasks add")
+            return {
+                "id": str(data.get("id", "")),
+                "title": str(data.get("title", title)),
+                "notes": str(data.get("notes", notes)),
+                "status": str(data.get("status", "")),
+                "list_id": lst["id"],
+                "list_title": lst["title"],
+            }
+        except (CliError, EOFError, OSError, UnicodeError, ValueError, KeyboardInterrupt) as exc:
+            if draft_path is None:
+                raise
+            recovery_path = Path("/tmp/gog-gtask.txt")
+            recovery_path.write_bytes(draft_path.read_bytes())
+            recovery_path.chmod(0o600)
+            message = str(exc) or "operation interrupted"
+            raise CliError(f"{message}; draft saved to {recovery_path}") from exc
+        finally:
+            if draft_path is not None:
+                draft_path.unlink(missing_ok=True)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -264,8 +304,8 @@ def _build_parser() -> argparse.ArgumentParser:
 
     p_add = sub.add_parser("add", help="Add a task to a task list")
     p_add.add_argument("--list", dest="list_name", help="Task list title or id (defaults to first list)")
-    p_add.add_argument("--title", required=True, help="Task title")
-    p_add.add_argument("--notes", default="", help="Task notes")
+    p_add.add_argument("--title", help="Task title; omit to open an editor")
+    p_add.add_argument("--notes", help="Task notes for noninteractive adds")
 
     return parser
 

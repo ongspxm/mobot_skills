@@ -14,7 +14,7 @@ uv run <path-to-skill>/scripts/botbot_gtask.py [--config /path/to/botbot-gtask.j
 Supports:
 - `ls` (list task lists)
 - `tasks [--list <title-or-id>]` (list incomplete tasks in a task list; defaults to the first list)
-- `add --title <title> --notes <notes> [--list <title-or-id>]` (create task)
+- `add [--title <title>] [--notes <notes>] [--list <title-or-id>]` (create a task; omit `--title` to open an editor)
 - `edit [--list <title-or-id>]` (select and edit an incomplete task title and notes)
 - `done [--list <title-or-id>]` (select and complete an incomplete task)
 
@@ -26,8 +26,9 @@ If `--list` is omitted, the first list from `ls` is used.
 - gog owns OAuth client setup, consent, token storage, and token refresh.
 - The command passes `--no-input`; configure gog before use.
 - `add`, `edit`, and `done` are always gated by `edit_whitelist`.
+- `add` opens `$EDITOR`, falling back to `$VISUAL` and then `vim` when `--title` is omitted. Line 1 is the title; the remaining text is notes (max 4000 characters). With `--title`, it is noninteractive; `--notes` requires `--title`.
 - `edit` opens `$EDITOR`, falling back to `$VISUAL`. Line 1 is the title, line 2 must be blank, remaining text is notes (max 4000 characters).
-- Failed edits are saved to `/tmp/gog-gtask.txt` with mode `0600`.
+- Failed edits and additions are saved to `/tmp/gog-gtask.txt` with mode `0600`.
 
 ## Configuration
 Config path precedence:
@@ -54,8 +55,8 @@ uv run <path-to-skill>/scripts/botbot_gtask.py tasks
 uv run <path-to-skill>/scripts/botbot_gtask.py tasks --list "Personal"
 uv run <path-to-skill>/scripts/botbot_gtask.py edit --list "Personal"
 uv run <path-to-skill>/scripts/botbot_gtask.py done --list "Personal"
+uv run <path-to-skill>/scripts/botbot_gtask.py add --list "Personal"
 uv run <path-to-skill>/scripts/botbot_gtask.py add --list "Personal" --title "Buy milk" --notes "2 liters"
-uv run <path-to-skill>/scripts/botbot_gtask.py add --title "Buy milk" --notes "2 liters"
 uv run <path-to-skill>/scripts/botbot_gtask.py --config ~/.botbot/botbot-gtask.json ls
 ```
 
