@@ -27,6 +27,11 @@ Before writing code, walk this ladder. Stop at the first rung that works:
 - Challenge over-engineered asks. Suggest the simpler, native, or YAGNI path before coding.
 - Add no boilerplate, configs, wrappers, or abstractions unless the app breaks without them.
 
+## Code Review
+- Review the actual diff and affected callers before adding abstractions.
+- Inline single-use helpers that only forward arguments or wrap trivial logic.
+- Keep changes targeted and compact. Reject unrelated cleanup and speculative refactors.
+
 ## Examples
 - Prefer native HTML date input over a date-picker dependency.
 - Prefer deleting unused branching over adding another flag.
