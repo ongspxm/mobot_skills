@@ -14,7 +14,7 @@ uv run <path-to-skill>/scripts/meagent_gmail_tagging.py <command> [args]
 Use this exact sequence, including `raw_output` mode (when calling the exec too, not part of the script):
 1. `rules` with `raw_output=false`.
 2. `fetch` with `raw_output=false`.
-3. `tag <idx> <action|reading|junk>` with `raw_output=false` for every row you tag, parallel tool call
+3. `tag <action|reading|junk> <idx1,idx2,...>` with `raw_output=false` for each tag batch
 4. `status` with `raw_output=false` for iterative tagging rounds.
 5. if `status` says there are still untagged rows, keep looping:
    run `tag ...` with `raw_output=false`, then `status` with `raw_output=false`.
@@ -27,7 +27,7 @@ Use this exact sequence, including `raw_output` mode (when calling the exec too,
 ## Commands
 - `fetch` - pull inbox threads via `botbot-gmail`, write `/tmp/tag_gmail.ndjson`, print rows.
 - `rules` - print base tagging rules + Google Tasks rules (`email_gps` by default).
-- `tag <idx> <action|reading|junk>` - set tag by local queue index.
+- `tag <action|reading|junk> <idx1,idx2,...>` - set one tag for comma-separated local queue indices.
 - `status` - validate tags, clear invalid tags, print only 20 untagged rows per run until fully tagged.
 - `push` - apply labels/trash to Gmail, clean queue state, and output JSON counts (`labelled`, `removed`, `labels_removed`).
 - `print` - show untagged first, then grouped `action`/`reading`/`junk`.
@@ -37,6 +37,7 @@ Use this exact sequence, including `raw_output` mode (when calling the exec too,
 - Default policy: when `raw_output` is not explicitly specified for a command, treat it as `raw_output=false`.
 - `idx` is local queue id, not Gmail `threadid`.
 - Keep `threadid` hidden from user-facing output.
+- For the `tag` subcommand, EXPLICITLY list every idx
 
 ## Queue File
 - Path: `/tmp/tag_gmail.ndjson`
@@ -54,7 +55,7 @@ If missing, command fails with a clear "not installed" error.
 ```bash
 uv run <path-to-skill>/scripts/meagent_gmail_tagging.py fetch
 uv run <path-to-skill>/scripts/meagent_gmail_tagging.py rules
-uv run <path-to-skill>/scripts/meagent_gmail_tagging.py tag 4 action
+uv run <path-to-skill>/scripts/meagent_gmail_tagging.py tag action 4,5,8
 uv run <path-to-skill>/scripts/meagent_gmail_tagging.py status
 uv run <path-to-skill>/scripts/meagent_gmail_tagging.py push
 uv run <path-to-skill>/scripts/meagent_gmail_tagging.py print

@@ -206,24 +206,25 @@ def cmd_rules(args: argparse.Namespace) -> int:
 
 
 def cmd_tag(args: argparse.Namespace) -> int:
-    idx = args.idx
     tag = args.tag.strip().lower()
     if tag not in VALID_TAGS:
         raise CliError(f"invalid tag '{args.tag}'; expected one of: action, reading, junk")
+    raw_idxs = args.idxs.split(",")
+    if not args.idxs.strip() or any(not idx.strip() for idx in raw_idxs):
+        raise CliError("invalid idx list; expected comma-separated queue ids")
+    try:
+        idxs = [int(idx.strip()) for idx in raw_idxs]
+    except ValueError as exc:
+        raise CliError("invalid idx list; expected comma-separated queue ids") from exc
     rows = _load_queue()
-
-    updated_row: dict[str, Any] | None = None
-    for row in rows:
-        if int(row.get("idx", -1)) == idx:
-            row["tag"] = tag
-            updated_row = row
-            break
-
-    if updated_row is None:
-        raise CliError(f"idx not found in queue: {idx}")
-
+    by_idx = {int(row.get("idx", -1)): row for row in rows}
+    missing = [idx for idx in idxs if idx not in by_idx]
+    if missing:
+        raise CliError("idx not found in queue: " + ", ".join(str(idx) for idx in missing))
+    for idx in idxs:
+        by_idx[idx]["tag"] = tag
     _save_queue(rows)
-    _print_rows([updated_row], include_tag=True)
+    _print_rows([by_idx[idx] for idx in idxs], include_tag=True)
     return 0
 
 
@@ -460,9 +461,9 @@ def main() -> int:
     sub.add_parser("fetch", help="Fetch inbox emails into local NDJSON queue")
     sub.add_parser("rules", help="Print tagging rules")
 
-    p_tag = sub.add_parser("tag", help="Set tag for one queue id")
-    p_tag.add_argument("idx", type=int, help="Queue idx from fetch output")
+    p_tag = sub.add_parser("tag", help="Set tag for queue ids")
     p_tag.add_argument("tag", help="One of: action, reading, junk")
+    p_tag.add_argument("idxs", help="Comma-separated queue ids from fetch output")
 
     sub.add_parser("status", help="Check if queue is fully tagged")
     sub.add_parser("push", help="Apply tags and trash junk")
