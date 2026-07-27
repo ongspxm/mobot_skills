@@ -1,6 +1,6 @@
 ---
 name: botbot-gmail
-description: Use when you need to list Gmail threads by query, delete (trash) a thread, or add a label to a thread through gog.
+description: Use when you need to list Gmail threads by query, read message bodies, delete a thread, or manage a label through gog.
 ---
 
 # Botbot Gmail
@@ -13,7 +13,7 @@ uv run <path-to-skill>/scripts/botbot_gmail.py [--config /path/to/botbot-gmail.j
 ## When to Use
 Supports:
 - `ls [query]` (NDJSON: `{threadid, from, subject, tstamp, labels}`; default query `in:INBOX`)
-- `read <thread_id>` (latest plaintext body)
+- `read <thread_id>` (latest body as plain text with inline link destinations)
 - `del <thread_id>` (trash a thread)
 - `tag <thread_id> <label>` (add a label)
 - `untag <thread_id> <label>` (remove a label)
