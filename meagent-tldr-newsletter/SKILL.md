@@ -1,6 +1,6 @@
 ---
 name: meagent-tldr-newsletter
-description: Use when you need to read TLDR Newsletter items from Gmail, print concise summaries with cleaned links, and optionally trash matching threads.
+description: Use when you need to read newsletter items from Gmail, print concise summaries with resolved links, and optionally trash matching threads.
 ---
 
 # Meagent TLDR Newsletter
@@ -12,25 +12,24 @@ uv run <path-to-skill>/scripts/meagent_tldr_newsletter.py trash
 ```
 
 ## When to Use
-This skill replicates the TLDR newsletter workflow behavior:
-- Scan inbox threads newest-first.
-- Keep only messages from `@tldrnewsletter.com`.
-- Parse article blocks and `Links:` section.
-- Resolve TLDR short links and strip `utm_` params.
-- Trim long descriptions to concise single-line snippets.
-- Deduplicate using extracted article link key.
+This skill:
+- Reads messages with the `6.auto` Gmail label, newest-first.
+- Parses TLDR, AI Secret, Robotics Herald, Marketing Secret, and Bay Area Letters article blocks.
+- Extracts title, description, and article link.
+- Follows newsletter tracking redirects and strips `utm_` parameters.
+- Trims descriptions and deduplicates by resolved link.
 
 ## Workflow
 1. Run `read` with `raw_output=True` and send output directly to user.
 2. Wait for explicit user confirmation: `ok`.
 3. Only after `ok`, run `trash`.
 
-`read` stores the exact thread batch to be deleted later.
-`trash` deletes only that stored batch (not a fresh inbox scan).
+`read` stores the exact parsed thread batch to be deleted later.
+`trash` deletes only that stored batch.
 
 ## Commands
 - `read` - print parsed newsletter items as plain text blocks.
-- `trash` - trash all TLDR newsletter threads currently in inbox and print result JSON.
+- `trash` - trash the stored newsletter threads and print result JSON.
 
 ## Boundaries
 - Always run with `uv run`.

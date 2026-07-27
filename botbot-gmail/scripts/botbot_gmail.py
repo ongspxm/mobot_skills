@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import argparse
 import base64
-import html
 import json
 import os
 import subprocess
@@ -40,12 +39,36 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 
 class _TagStripper(HTMLParser):
+    BLOCK_TAGS = {"br", "div", "h1", "h2", "h3", "h4", "h5", "h6", "li", "p", "section", "td", "tr"}
+
     def __init__(self) -> None:
         super().__init__()
         self.parts: list[str] = []
+        self.href: str | None = None
+        self.ignored = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in {"style", "script"}:
+            self.ignored += 1
+        elif not self.ignored:
+            if tag in self.BLOCK_TAGS:
+                self.parts.append("\n")
+            if tag == "a":
+                self.href = dict(attrs).get("href")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in {"style", "script"}:
+            self.ignored = max(0, self.ignored - 1)
+        elif not self.ignored:
+            if tag == "a" and self.href:
+                self.parts.append(f" ({self.href})")
+                self.href = None
+            if tag in self.BLOCK_TAGS:
+                self.parts.append("\n")
 
     def handle_data(self, data: str) -> None:
-        self.parts.append(data)
+        if not self.ignored:
+            self.parts.append(data)
 
     def text(self) -> str:
         return "".join(self.parts)
@@ -116,20 +139,20 @@ class GmailClient:
         return ""
 
     def _plaintext(self, message: dict[str, Any]) -> str:
+        payload = message.get("payload")
+        if isinstance(payload, dict):
+            html_part = self._extract_body_part(payload, "text/html")
+            if html_part:
+                stripper = _TagStripper()
+                stripper.feed(html_part)
+                return stripper.text()
+            plain = self._extract_body_part(payload, "text/plain")
+            if plain:
+                return plain
         for key in ("textBody", "text", "body"):
             value = message.get(key)
             if isinstance(value, str) and value.strip():
                 return value
-        payload = message.get("payload")
-        if isinstance(payload, dict):
-            plain = self._extract_body_part(payload, "text/plain")
-            if plain:
-                return plain
-            html_part = self._extract_body_part(payload, "text/html")
-            if html_part:
-                stripper = _TagStripper()
-                stripper.feed(html.unescape(html_part))
-                return stripper.text()
         return str(message.get("snippet", ""))
 
     @staticmethod
@@ -153,6 +176,9 @@ class GmailClient:
                 {
                     "threadid": threadid,
                     "from": str(item.get("from") or item.get("sender") or ""),
+                    "reply-to": str(
+                        item.get("replyTo") or item.get("reply_to") or item.get("reply-to") or ""
+                    ),
                     "subject": str(item.get("subject") or ""),
                     "tstamp": item.get("internalDate") or item.get("internal_date") or item.get("date") or "",
                     "labels": self._labels(item.get("labels") or item.get("labelIds")),
@@ -204,7 +230,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub.add_parser("refresh", help="Verify gog can refresh the configured account token")
     p_ls = sub.add_parser("ls", help='List threads matching query (default: "in:INBOX")')
     p_ls.add_argument("query", nargs="?", default="in:INBOX")
-    for cmd, help_text in (("del", "Trash a thread by id"), ("read", "Read latest plaintext body in a thread")):
+    for cmd, help_text in (("del", "Trash a thread by id"), ("read", "Read latest body with inline links")):
         item = sub.add_parser(cmd, help=help_text)
         item.add_argument("threadid", help="Gmail thread id")
     for cmd, help_text in (("tag", "Add label to a thread"), ("untag", "Remove label from a thread")):

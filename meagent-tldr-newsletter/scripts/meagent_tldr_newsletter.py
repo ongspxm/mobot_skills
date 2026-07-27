@@ -2,16 +2,20 @@
 import argparse
 import json
 import re
-from datetime import datetime
+import shutil
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 from pathlib import Path
+from urllib.parse import parse_qsl, unquote, urlencode, urlsplit, urlunsplit
 
 
-TLDR_SENDER = "@tldrnewsletter.com"
+TLDR_QUERY = "in:INBOX label:6.auto"
 TARGET_CHARS = 140
 PENDING_PATH = Path("/tmp/meagent_tldr_newsletter_threads.json")
 WS_RE = re.compile(r"\s+")
+URL_RE = re.compile(r"https?://[^)\s]+")
 
 
 class CliError(RuntimeError):
@@ -32,65 +36,119 @@ def _run(cmd: list[str]) -> str:
     return proc.stdout
 
 
-def _clean_link(link: str) -> str:
-    for sep in ("?utm_", "&utm_"):
-        if sep in link:
-            return link.split(sep, 1)[0]
-    return link
+def _shorten(value: str) -> str:
+    value = WS_RE.sub(" ", value).strip()
+    value = "".join(c if ord(c) < 128 else "_" for c in value)
+    if len(value) > TARGET_CHARS:
+        return value[: TARGET_CHARS - 3].rstrip() + "..."
+    return value
 
 
-def _parse_items(body: str) -> dict[str, str]:
+def _format_item(title: str, desc: str, link: str) -> tuple[str, str]:
+    # TLDR uses both tracking.tldrnewsletter.com and Short.io links.tldrnewsletter.com.
+    parts = urlsplit(link)
+    if parts.netloc.lower() == "tracking.tldrnewsletter.com" and parts.path.startswith("/CL0/"):
+        encoded_target = parts.path.removeprefix("/CL0/").split("/1/", 1)
+        if len(encoded_target) == 2:
+            link = unquote(encoded_target[0])
+    result = subprocess.run(
+        ["curl", "-sS", "-L", "-o", "/dev/null", "-w", "%{url_effective}", "--max-time", "20", link],
+        capture_output=True, text=True, check=False,
+    )
+    if result.returncode == 0 and result.stdout.strip():
+        link = result.stdout.strip()
+    parts = urlsplit(link)
+    query = [(key, value) for key, value in parse_qsl(parts.query, keep_blank_values=True)
+             if not key.startswith("utm_") and key != "ref"]
+    link = urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
+    text = f"=== {_shorten(title)} ({link})\n{_shorten(desc.removeprefix('TL;DR:'))}"
+    return link, text
+
+
+def _parse_tldr(body: str) -> list[tuple[str, str, str]]:
     main, _, rest = body.partition("\nLinks:")
-    main = "".join(c if ord(c) < 128 else "_" for c in main)
-    blocks = [b.replace("\n", " ").strip() for b in main.split("\n\n")]
-    lines = [b for b in blocks if b]
+    lines = [line.strip() for line in main.splitlines()]
+    items: list[tuple[str, str, str]] = []
 
-    links: dict[int, str] = {}
-    for ln in rest.splitlines():
-        if "http" not in ln:
-            continue
-        parts = ln.strip().split(" ")
-        if len(parts) < 2 or not parts[0].startswith("[") or not parts[0].endswith("]"):
-            continue
-        idx = parts[0][1:-1]
-        if idx.isdigit():
-            links[int(idx)] = _clean_link(parts[1].strip())
+    links = {
+        int(match.group(1)): match.group(2)
+        for line in rest.splitlines()
+        if (match := re.match(r"\[(\d+)\]\s+(https?://\S+)", line))
+    }
 
-    out: dict[str, str] = {}
-    cur_idx: int | None = None
-    cur_header = ""
-    for ln in lines:
-        token = ln.split(" ")[-1]
-        is_title = ln == ln.upper() and token.startswith("[") and token.endswith("]") and token[1:-1].isdigit()
-        if is_title:
-            cur_idx = int(token[1:-1])
-            hdr = "=== " + ln
-            if cur_idx in links:
-                hdr = hdr.replace(f"[{cur_idx}]", f"[{cur_idx}]({links[cur_idx]})", 1)
-            cur_header = hdr
+    old_lines = [
+        "".join(c if ord(c) < 128 else "_" for c in block.replace("\n", " ").strip())
+        for block in main.split("\n\n")
+        if block.strip()
+    ]
+    for line, desc in zip(old_lines, old_lines[1:]):
+        token = line.rsplit(" ", 1)[-1]
+        if line == line.upper() and re.fullmatch(r"\[\d+\]", token):
+            link = links.get(int(token[1:-1]))
+            if link:
+                items.append((line, desc, link))
+
+    for index, line in enumerate(lines):
+        if not re.search(r"\((?:\d+ minute read|GitHub Repo)\)(?: \(sponsor\))?$", line, re.IGNORECASE):
             continue
-        if cur_idx is None:
-            continue
-        desc = WS_RE.sub(" ", ln.strip())
-        if len(desc) > TARGET_CHARS:
-            desc = desc[: TARGET_CHARS - 3].rstrip() + "..."
-        item = f"{cur_header}\n{desc}"
-        key = cur_header
-        if "https://" in cur_header:
-            key = "https://" + cur_header.split("https://", 1)[1].split(")", 1)[0].split(" ", 1)[0]
-        out[key] = item
-        cur_idx = None
-    return out
+        values = [value for value in lines[index + 1 :] if value][:2]
+        if len(values) == 2 and (match := URL_RE.fullmatch(values[0].strip("()"))):
+            items.append((line, values[1], match.group(0)))
+    return items
 
 
-def _collect() -> tuple[list[str], dict[str, str]]:
+def _parse_aisecret(body: str) -> list[tuple[str, str, str]]:
+    lines = [line.strip() for line in body.splitlines()]
+    items: list[tuple[str, str, str]] = []
+    for index, line in enumerate(lines):
+        if line.startswith("TL;DR:") and (
+            match := re.search(r"Read more\s*(?:\u2192|->)\s*\((https?://[^)\s]+)\)", line)
+        ):
+            title = next(
+                (value for value in reversed(lines[:index])
+                 if value and not URL_RE.fullmatch(value.strip("()"))),
+                "",
+            )
+            if title:
+                items.append((title, line.split("Read more", 1)[0].rstrip(), match.group(1)))
+
+    sections: list[tuple[int, int]] = []
+    for index, line in enumerate(lines):
+        if not re.fullmatch(r"[A-Z]+", line):
+            continue
+        title_index = index + 1
+        while title_index < len(lines) and not lines[title_index]:
+            title_index += 1
+        if title_index < len(lines):
+            sections.append((index, title_index))
+
+    for position, (index, title_index) in enumerate(sections):
+        end = sections[position + 1][0] if position + 1 < len(sections) else len(lines)
+        title = lines[title_index]
+        candidates = lines[title_index + 1 : end]
+        link_index = next(
+            (index for index, candidate in enumerate(candidates) if URL_RE.fullmatch(candidate.strip("()"))),
+            -1,
+        )
+        if link_index < 0:
+            continue
+        desc = candidates[link_index + 1] if link_index + 1 < len(candidates) else ""
+        if not desc:
+            desc = next((candidate for candidate in reversed(candidates[:link_index]) if candidate), "")
+        items.append((title, desc, candidates[link_index].strip("()")))
+    return items
+
+
+def cmd_read(_: argparse.Namespace) -> int:
+    if shutil.which("curl") is None:
+        raise CliError("required dependency not installed: curl")
     gmail = _gmail_cmd()
     rows = []
-    for ln in _run(gmail + ["ls", "in:INBOX"]).splitlines():
-        if not ln.strip():
+    for line in _run(gmail + ["ls", TLDR_QUERY]).splitlines():
+        if not line.strip():
             continue
         try:
-            row = json.loads(ln)
+            row = json.loads(line)
         except json.JSONDecodeError as exc:
             raise CliError("botbot-gmail ls returned non-NDJSON output") from exc
         if isinstance(row, dict):
@@ -100,19 +158,27 @@ def _collect() -> tuple[list[str], dict[str, str]]:
     tids: list[str] = []
     items: dict[str, str] = {}
     for row in rows:
-        frm = str(row.get("from") or "").lower()
         tid = str(row.get("threadid") or "").strip()
-        if TLDR_SENDER not in frm or not tid:
+        if not tid:
+            continue
+        sender = str(row.get("from") or "").lower()
+        reply_to = str(row.get("reply-to") or row.get("reply_to") or "").lower()
+        if "dan@tldrnewsletter.com" in sender:
+            parser = _parse_tldr
+        # Leo sends AI Secret, Robotics Herald, Marketing Secret, and Bay Area Letters.
+        elif "leo@aisecret.us" in reply_to or "leo@aisecret.us" in sender:
+            parser = _parse_aisecret
+        else:
+            continue
+        body = "\n".join(x.strip() for x in _run(gmail + ["read", tid]).splitlines())
+        parsed = parser(body)
+        if not parsed:
             continue
         if tid not in tids:
             tids.append(tid)
-        body = "\n".join(x.strip() for x in _run(gmail + ["read", tid]).splitlines())
-        items.update(_parse_items(body))
-    return tids, items
-
-
-def cmd_read(_: argparse.Namespace) -> int:
-    tids, items = _collect()
+        with ThreadPoolExecutor(max_workers=128) as executor:
+            for key, text in executor.map(lambda item: _format_item(*item), parsed):
+                items[key] = text
     PENDING_PATH.write_text(json.dumps({"thread_ids": tids}, separators=(",", ":")), encoding="utf-8")
     if items:
         print("\n\n".join(items.values()) + "\n\nNEXT: if user says ok, read skill and run trash")
