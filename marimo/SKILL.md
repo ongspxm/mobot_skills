@@ -38,12 +38,11 @@ import marimo as mo
 app = mo.App(title="Example")
 
 
-@app.cell
-def setup():
-    # Imports only. Return libs that downstream cells need.
+with app.setup:
+    # `with app.setup:` creates the special setup cell.
+    # It runs before other cells and cannot reference variables from them.
     import marimo as mo
     import numpy as np
-    return mo, np
 
 
 @app.cell
@@ -56,7 +55,7 @@ def data():
 
 @app.cell
 def controls(mo):
-    # `mo` arg is injected from setup(); do not call setup() by hand.
+    # `mo` is exported by the special `app.setup` cell; do not call it by hand.
     slider = mo.ui.slider(start=1, stop=10, value=5, label="Multiplier")
     mo.hstack([mo.md("### Adjust"), slider])  # last expr displays
     return slider,

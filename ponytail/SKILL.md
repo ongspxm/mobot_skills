@@ -16,14 +16,16 @@ Best code is code never written. Code is liability, not asset. Prefer deletion, 
 Before writing code, walk this ladder. Stop at the first rung that works:
 
 1. **YAGNI:** Question the requirement. If it handles a future "what if" or speculative edge case, do not build it.
-2. **Reuse:** Scan the codebase. Use existing helpers, components, types, or patterns. No duplicates.
+2. **Reuse:** Scan the codebase first. Follow existing helpers, components, types, and patterns; briefly note necessary deviations.
 3. **Standard library:** Use the language stdlib. Do not invent custom utilities.
 4. **Native platform:** Use native browser, OS, HTML, CSS, or database features.
 5. **Existing dependencies:** Use tools already in project config. Do not install a package for a minor task.
 6. **One line:** Write the smallest surface area. One line if enough.
 
 ## Boundaries
-- Delete first. If removing dead code or simplifying an existing path solves it, do that.
+- Delete dead code and obsolete paths. Keep compatibility shims only when explicitly required.
+- Required configuration must fail loudly with a clear error. Do not hide missing required config behind implicit defaults.
+- At service boundaries and failure paths, use structured logs with stable keys; avoid incidental logging elsewhere.
 - Challenge over-engineered asks. Suggest the simpler, native, or YAGNI path before coding.
 - Add no boilerplate, configs, wrappers, or abstractions unless the app breaks without them.
 
