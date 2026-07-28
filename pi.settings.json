@@ -3,9 +3,9 @@
   "hideThinkingBlock": false,
   "packages": [
     "npm:@schultzp2020/pi-cursor",
-    "npm:pi-web-surf",
+    "npm:pi-web-access",
     "npm:@the-agency/pi-hashline-edit",
-    "git:github.com/ongspxm/pi-subagent@tmp"
+    "git:github.com/ongspxm/pi-subagent"
   ],
   "theme": "dark"
 }

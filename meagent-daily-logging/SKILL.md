@@ -29,7 +29,7 @@ JSON object in `~/.botbot/meagent-daily-logging.json`:
 - `api_hash` (required)
 - `bot_token` (required)
 - `timezone` (optional, default `Asia/Singapore`)
-- `log_folder` (optional, default `~/docs/autolog`)
+- `log_folder` (optional, default `~/docs/_journal`)
 - `chats` (required object): mapping `tag -> chat_id` (integer)
 
 Example:

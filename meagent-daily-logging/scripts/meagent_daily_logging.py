@@ -204,7 +204,7 @@ async def run() -> int:
 
     raw_log_folder = cfg.get("log_folder")
     if raw_log_folder is None:
-        log_folder = Path.home() / "docs/autolog"
+        log_folder = Path.home() / "docs/_journal"
     else:
         folder_text = str(raw_log_folder).strip()
         if not folder_text:

@@ -5,9 +5,7 @@ export EDITOR=vim
 command -v fzf >/dev/null && eval "$(fzf --bash)"
 
 if command -v xset >/dev/null 2>&1 && [ -n "${DISPLAY:-}" ]; then
-    xset s off
-    xset -dpms
-    xset s noblank
+    xset s off && xset -dpms && xset s noblank
 fi
 
 # piweb web term works better when tmux is doing the buffering

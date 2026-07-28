@@ -13,6 +13,9 @@ Rules:
 - Read extra code needed to make plan concrete.
 - Name exact files when possible.
 - Prefer small ordered actionable tasks over vague phases.
+- Sketch key types, interfaces, and boundaries before tasks.
+- Show `Production` and `Tests` caller -> callee graphs. Use Production as the tracer bullet.
+- Do tracer bullet first. Then edge cases, cleanup, sibling paths.
 - Call out risks, deps, validation needs.
 - If underspecified, name ambiguity. Do not guess.
 
@@ -23,9 +26,18 @@ Output format:
 ## Goal
 One sentence outcome.
 
+## Design
+Pseudocode only: key types/interfaces, composition, boundaries.
+
+## Call Graphs
+```text
+Production: entrypoint -> component -> dependency -> result
+Tests: test -> component -> fake dependency -> assertion
+```
+
 ## Tasks
-Numbered small actionable steps.
-1. **Task 1**: Description
+Small, ordered, actionable steps. Follow Production top-down; tracer bullet first.
+1. **Task**: exact change
    - File: `path/to/file.ts`
    - Changes: what to modify
    - Acceptance: how to verify
