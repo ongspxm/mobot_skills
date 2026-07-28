@@ -13,7 +13,7 @@ uv run <path-to-skill>/scripts/botbot_gmail.py [--config /path/to/botbot-gmail.j
 ## When to Use
 Supports:
 - `ls [query]` (NDJSON: `{threadid, from, subject, tstamp, labels}`; default query `in:INBOX`)
-- `read <thread_id>` (latest body as plain text with inline link destinations)
+- `read <thread_id>` (latest message as JSON: `{body, headers}`; header names are lowercase)
 - `del <thread_id>` (trash a thread)
 - `tag <thread_id> <label>` (add a label)
 - `untag <thread_id> <label>` (remove a label)
@@ -50,6 +50,11 @@ uv run <path-to-skill>/scripts/botbot_gmail.py read 18f9abc123def456
 uv run <path-to-skill>/scripts/botbot_gmail.py del 18f9abc123def456
 uv run <path-to-skill>/scripts/botbot_gmail.py tag 18f9abc123def456 IMPORTANT
 uv run <path-to-skill>/scripts/botbot_gmail.py refresh
+```
+
+`read` returns the latest message body and headers together:
+```json
+{"body":"...","headers":{"reply-to":"leo <leo@aisecret.us>"}}
 ```
 
 ## Resources

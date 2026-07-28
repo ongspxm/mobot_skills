@@ -46,6 +46,15 @@ def _run_stdout(cmd: list[str]) -> str:
         raise CliError(f"subprocess failed ({' '.join(cmd)}): {detail}")
     return proc.stdout
 
+def _read_body(cmd: list[str]) -> str:
+    try:
+        result = json.loads(_run_stdout(cmd))
+    except json.JSONDecodeError as exc:
+        raise CliError("botbot-gmail read returned non-JSON output") from exc
+    if not isinstance(result, dict):
+        raise CliError("botbot-gmail read returned a non-object")
+    return str(result.get("body") or "")
+
 
 def _gmail_base_cmd() -> list[str]:
     script = _find_skill_script("botbot-gmail", "botbot_gmail.py")
@@ -157,7 +166,7 @@ def cmd_fetch(args: argparse.Namespace) -> int:
         workers = min(8, len(targets))
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
             future_to_row = {
-                pool.submit(_run_stdout, gmail_cmd + ["read", str(row.get("threadid", "")).strip()]): row
+                pool.submit(_read_body, gmail_cmd + ["read", str(row.get("threadid", "")).strip()]): row
                 for row in targets
             }
             for fut in concurrent.futures.as_completed(future_to_row):
@@ -258,7 +267,7 @@ def cmd_status(args: argparse.Namespace) -> int:
             thread_id = str(row.get("threadid", "")).strip()
             if not thread_id:
                 continue
-            body = _run_stdout(gmail_cmd + ["read", thread_id]).strip()
+            body = _read_body(gmail_cmd + ["read", thread_id]).strip()
             row["snippet"] = _to_snippet(body)
             enriched = True
         if enriched:

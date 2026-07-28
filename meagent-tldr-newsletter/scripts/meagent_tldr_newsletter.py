@@ -112,6 +112,14 @@ def _parse_aisecret(body: str) -> list[tuple[str, str, str]]:
             if title:
                 items.append((title, line.split("Read more", 1)[0].rstrip(), match.group(1)))
 
+    for index, line in enumerate(lines):
+        if not URL_RE.fullmatch(line.strip("()")):
+            continue
+        title = next((value for value in reversed(lines[:index]) if value), "")
+        desc = next((value for value in lines[index + 1 :] if value), "")
+        if title and "What's happening:" in desc:
+            items.append((title, desc, line.strip("()")))
+
     sections: list[tuple[int, int]] = []
     for index, line in enumerate(lines):
         if not re.fullmatch(r"[A-Z]+", line):
@@ -135,7 +143,8 @@ def _parse_aisecret(body: str) -> list[tuple[str, str, str]]:
         desc = candidates[link_index + 1] if link_index + 1 < len(candidates) else ""
         if not desc:
             desc = next((candidate for candidate in reversed(candidates[:link_index]) if candidate), "")
-        items.append((title, desc, candidates[link_index].strip("()")))
+        if "What's happening:" not in desc:
+            items.append((title, desc, candidates[link_index].strip("()")))
     return items
 
 
@@ -162,15 +171,22 @@ def cmd_read(_: argparse.Namespace) -> int:
         if not tid:
             continue
         sender = str(row.get("from") or "").lower()
-        reply_to = str(row.get("reply-to") or row.get("reply_to") or "").lower()
+        try:
+            result = json.loads(_run(gmail + ["read", tid]))
+        except json.JSONDecodeError as exc:
+            raise CliError("botbot-gmail read returned non-JSON output") from exc
+        if not isinstance(result, dict):
+            raise CliError("botbot-gmail read returned a non-object")
+        body = str(result.get("body") or "")
         if "dan@tldrnewsletter.com" in sender:
             parser = _parse_tldr
-        # Leo sends AI Secret, Robotics Herald, Marketing Secret, and Bay Area Letters.
-        elif "leo@aisecret.us" in reply_to or "leo@aisecret.us" in sender:
-            parser = _parse_aisecret
         else:
-            continue
-        body = "\n".join(x.strip() for x in _run(gmail + ["read", tid]).splitlines())
+            headers = result.get("headers") if isinstance(result.get("headers"), dict) else {}
+            reply_to = str(headers.get("reply-to") or "").lower()
+            # Leo sends AI Secret, Robotics Herald, Marketing Secret, and Bay Area Letters.
+            if "leo@aisecret.us" not in reply_to:
+                continue
+            parser = _parse_aisecret
         parsed = parser(body)
         if not parsed:
             continue

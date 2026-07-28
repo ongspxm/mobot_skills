@@ -30,6 +30,26 @@ class GmailBodyTest(unittest.TestCase):
         parser.feed('<p><a href="https://example.com?a=1&amp;b=2">Read</a></p>')
         self.assertIn("Read (https://example.com?a=1&b=2)", parser.text())
 
+    def test_read_json_includes_latest_body_and_headers(self):
+        client = gmail.GmailClient.__new__(gmail.GmailClient)
+        client._run_gog_json = MagicMock(return_value={
+            "thread": {
+                "messages": [
+                    {"internalDate": "1", "body": "old", "payload": {"headers": []}},
+                    {
+                        "internalDate": "2",
+                        "body": "latest",
+                        "payload": {"headers": [{"name": "Reply-To", "value": "leo <leo@aisecret.us>"}]},
+                    },
+                ]
+            }
+        })
+        self.assertEqual(
+            client.read_latest_thread("thread"),
+            {"body": "latest", "headers": {"reply-to": "leo <leo@aisecret.us>"}},
+        )
+        client._run_gog_json.assert_called_once_with("gmail", "thread", "get", "thread", "--full")
+
 
 class NewsletterParserTest(unittest.TestCase):
     def test_tldr_article_markers(self):
@@ -57,6 +77,25 @@ TL;DR: AI description Read more -> (https://ai.example/)
         self.assertEqual(
             newsletter._parse_aisecret(body),
             [("AI title", "TL;DR: AI description", "https://ai.example/")],
+        )
+
+    def test_ai_secret_section_format(self):
+        body = """NEW LAUNCH
+Your AI Agent Can Go Broke
+(https://aisecret.us/r/article)
+\U0001f440 What's happening: An agent has to pay its own compute bill.
+
+M&A
+Midjourney Sells Horoscopes Now
+(https://aisecret.us/r/second)
+\U0001f440 What's happening: Midjourney bought Co-Star.
+"""
+        self.assertEqual(
+            newsletter._parse_aisecret(body),
+            [
+                ("Your AI Agent Can Go Broke", "\U0001f440 What's happening: An agent has to pay its own compute bill.", "https://aisecret.us/r/article"),
+                ("Midjourney Sells Horoscopes Now", "\U0001f440 What's happening: Midjourney bought Co-Star.", "https://aisecret.us/r/second"),
+            ],
         )
 
     def test_legacy_formats_remain_supported(self):
@@ -102,17 +141,24 @@ footer text
 
 
 class NewsletterDispatchTest(unittest.TestCase):
-    def test_dispatches_by_sender_without_reading_unknown_rows(self):
+    def test_dispatches_by_reply_to_with_one_read(self):
         rows = [
             {"threadid": "tldr", "from": "dan@tldrnewsletter.com", "tstamp": "2026-01-03T00:00:00"},
-            {"threadid": "ai", "reply_to": "leo@aisecret.us", "tstamp": "2026-01-02T00:00:00"},
+            {"threadid": "ai", "from": "newsletter@aisecret.us", "tstamp": "2026-01-02T00:00:00"},
             {"threadid": "other", "from": "other@example.com", "tstamp": "2026-01-01T00:00:00"},
         ]
         output = "\n".join(__import__("json").dumps(row) for row in rows)
         bodies = {"tldr": "tldr body", "ai": "ai body"}
 
+        calls = []
         def run(cmd):
-            return output if cmd[-2] == "ls" else bodies[cmd[-1]]
+            calls.append(cmd)
+            if cmd[-2] == "ls":
+                return output
+            if cmd[-2] == "read":
+                reply_to = "leo <leo@aisecret.us>" if cmd[-1] == "ai" else ""
+                return __import__("json").dumps({"body": bodies.get(cmd[-1], "other body"), "headers": {"reply-to": reply_to}})
+            raise AssertionError(f"unexpected command: {cmd}")
 
         with patch.object(newsletter, "_run", side_effect=run), \
              patch.object(newsletter, "_parse_tldr", return_value=[]) as parse_tldr, \
@@ -122,6 +168,8 @@ class NewsletterDispatchTest(unittest.TestCase):
 
         parse_tldr.assert_called_once_with("tldr body")
         parse_ai.assert_called_once_with("ai body")
+        self.assertFalse(any("headers" in call for call in calls))
+        self.assertEqual(sum("read" in call for call in calls), 3)
 
 
 if __name__ == "__main__":

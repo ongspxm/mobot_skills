@@ -193,7 +193,7 @@ class GmailClient:
         self._run_gog_json("gmail", "thread", "modify", tid, "--add", "TRASH")
         return {"threadid": tid, "status": "trashed"}
 
-    def read_latest_thread_body(self, thread_id: str) -> str:
+    def read_latest_thread(self, thread_id: str) -> dict[str, Any]:
         tid = thread_id.strip()
         if not tid:
             raise CliError("threadid cannot be empty")
@@ -201,10 +201,23 @@ class GmailClient:
         if not isinstance(data, dict):
             raise CliError("unexpected response from gog gmail thread get")
         thread = data.get("thread") if isinstance(data.get("thread"), dict) else data
-        text = self._plaintext(self._latest_message(thread)).strip()
+        message = self._latest_message(thread)
+        text = self._plaintext(message).strip()
         if not text:
             raise CliError("unable to extract body from latest message")
-        return text
+        payload = message.get("payload")
+        headers = payload.get("headers") if isinstance(payload, dict) else None
+        return {
+            "body": text,
+            "headers": {
+                str(header.get("name")).lower(): str(header.get("value"))
+                for header in headers or []
+                if isinstance(header, dict) and header.get("name")
+            },
+        }
+
+    def read_latest_thread_body(self, thread_id: str) -> str:
+        return str(self.read_latest_thread(thread_id)["body"])
 
     def modify_thread_label(self, thread_id: str, label: str, flag: str) -> dict[str, Any]:
         tid = thread_id.strip()
@@ -230,9 +243,10 @@ def _build_parser() -> argparse.ArgumentParser:
     sub.add_parser("refresh", help="Verify gog can refresh the configured account token")
     p_ls = sub.add_parser("ls", help='List threads matching query (default: "in:INBOX")')
     p_ls.add_argument("query", nargs="?", default="in:INBOX")
-    for cmd, help_text in (("del", "Trash a thread by id"), ("read", "Read latest body with inline links")):
-        item = sub.add_parser(cmd, help=help_text)
-        item.add_argument("threadid", help="Gmail thread id")
+    p_del = sub.add_parser("del", help="Trash a thread by id")
+    p_del.add_argument("threadid", help="Gmail thread id")
+    p_read = sub.add_parser("read", help="Read latest body and headers as JSON")
+    p_read.add_argument("threadid", help="Gmail thread id")
     for cmd, help_text in (("tag", "Add label to a thread"), ("untag", "Remove label from a thread")):
         item = sub.add_parser(cmd, help=help_text)
         item.add_argument("threadid", help="Gmail thread id")
@@ -252,7 +266,7 @@ def main() -> int:
         elif args.cmd == "del":
             print(json.dumps(client.delete_thread(args.threadid), indent=2))
         elif args.cmd == "read":
-            print(client.read_latest_thread_body(args.threadid))
+            print(json.dumps(client.read_latest_thread(args.threadid), separators=(",", ":")))
         elif args.cmd == "tag":
             print(json.dumps(client.modify_thread_label(args.threadid, args.label, "--add"), indent=2))
         elif args.cmd == "untag":
