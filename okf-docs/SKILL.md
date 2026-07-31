@@ -38,7 +38,7 @@ timestamp: 2026-07-09T22:04:00Z
 ---
 ```
 
-`docs/index.md` is the root map for project context, registered tags, and any knowledge maps. Create separate map folders only when useful and requested.
+`docs/index.md` is the root map for project context, registered tags, and any knowledge maps. Create separate map folders only when useful and requested. Knowledge maps should group concepts by purpose or type and expose useful metadata such as date and status, not only repeat a bare file list.
 
 ## Workflow
 After creating or changing docs, run:

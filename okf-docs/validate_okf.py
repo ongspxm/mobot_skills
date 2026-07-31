@@ -3,6 +3,8 @@ import re
 import sys
 from datetime import datetime, timezone
 
+from urllib.parse import unquote, urlsplit
+
 import yaml
 
 def get_repo_root():
@@ -31,7 +33,11 @@ def validate_docs():
     allowed_tags = extract_valid_tags(os.path.join(docs_dir, 'index.md'))
 
     errors = []
-    link_pattern = re.compile(r'\[.*?\]\((?!http)(.*?)\)')
+    link_patterns = (
+        re.compile(r'!?\[[^\]]*\]\(\s*(<[^>]*>|[^)\s]+)'),
+        re.compile(r'!\[\[([^]|#]+)'),
+    )
+    markdown_files = []
 
     for dirpath, _, filenames in os.walk(docs_dir):
         for filename in filenames:
@@ -43,6 +49,7 @@ def validate_docs():
 
             with open(filepath, 'r', encoding='utf-8') as f:
                 content = f.read()
+            markdown_files.append((rel_path, content))
 
             if filename not in ['log.md', 'index.md']:
                 if not content.startswith('---'):
@@ -77,17 +84,23 @@ def validate_docs():
                 except Exception as e:
                     errors.append(f"{rel_path}: Invalid YAML formatting ({str(e).strip()})")
 
-            for link in link_pattern.findall(content):
-                clean_link = link.split('#')[0].split('?')[0]
-                if not clean_link:
+    # Check local Markdown links and embeds relative to each source file.
+    for rel_path, content in markdown_files:
+        for pattern in link_patterns:
+            for match in pattern.finditer(content):
+                link = match.group(1).strip()
+                if link.startswith('<') and link.endswith('>'):
+                    link = link[1:-1]
+                parsed_link = urlsplit(link)
+                if not parsed_link.path or parsed_link.scheme or link.startswith('//'):
                     continue
-
-                if clean_link.startswith('/'):
-                    target_path = os.path.normpath(os.path.join(docs_dir, clean_link.lstrip('/')))
-                else:
-                    target_path = os.path.normpath(os.path.join(dirpath, clean_link))
-
-                if not os.path.exists(target_path):
+                clean_link = unquote(parsed_link.path)
+                base_path = docs_dir if clean_link.startswith('/') else os.path.dirname(os.path.join(root, rel_path))
+                target_path = os.path.normpath(os.path.join(base_path, clean_link.lstrip('/')))
+                if (
+                    os.path.commonpath((docs_dir, target_path)) != docs_dir
+                    or not os.path.exists(target_path)
+                ):
                     errors.append(f"{rel_path}: Broken link target '{link}'")
 
     if errors:
