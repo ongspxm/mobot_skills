@@ -25,14 +25,25 @@ Before writing code, walk this ladder. Stop at the first rung that works:
 ## Boundaries
 - Delete dead code and obsolete paths. Keep compatibility shims only when explicitly required.
 - Required configuration must fail loudly with a clear error. Do not hide missing required config behind implicit defaults.
-- At service boundaries and failure paths, use structured logs with stable keys; avoid incidental logging elsewhere.
+- At service boundaries and failure paths, log one useful outcome event. Avoid incidental breadcrumbs.
 - Challenge over-engineered asks. Suggest the simpler, native, or YAGNI path before coding.
 - Add no boilerplate, configs, wrappers, or abstractions unless the app breaks without them.
+
+## Structured Logging
+Use the same schema across languages and services:
+- Name events `domain.action`: `auth.login`, `payment.capture`. Put changing data in attributes.
+- Use flat dotted `snake_case` keys: `payment.result`, `http.status_code`.
+- Use low-cardinality outcomes: `succeeded`, `failed`, `retried`, `canceled`. Match severity to outcome.
+- Name numeric units: `amount_cents`, `size_bytes`, `item_count`.
+- Log primitives and primitive arrays. Flatten queryable fields. Never dump whole request, user, payment, response, or error objects.
+- Emit success and failure outcomes. Use spans for timing. Check PII, secrets, identifiers, retention, and shared context.
+- Lint the shape. Review domain correctness and incident-critical fields.
 
 ## Code Review
 - Review the actual diff and affected callers before adding abstractions.
 - Inline single-use helpers that only forward arguments or wrap trivial logic.
 - Keep changes targeted and compact. Reject unrelated cleanup and speculative refactors.
+- Reconstruct the actual problem and constraints before deciding code is necessary; then prefer the simplest solution that works.
 
 ## Examples
 - Prefer native HTML date input over a date-picker dependency.
