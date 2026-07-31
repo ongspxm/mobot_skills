@@ -19,7 +19,7 @@ alias gitpush="git pull --rebase && git push"
 alias gwt="git worktree"
 gwtadd() {
     gitbranch=${1:-$(git rev-parse --short HEAD)}
-    githome=$(git rev-parse --show-toplevel)
+    githome=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
     gitpath=$(echo "$gitbranch" | tr -cd '[:alnum:]' | tr '[:upper:]' '[:lower:]')
     if [ -n "$1" ] && ! git show-ref --verify --quiet "refs/heads/$gitbranch"; then
         git worktree add -b "$gitbranch" "$githome/.worktree-$gitpath" HEAD
