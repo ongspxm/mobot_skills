@@ -8,10 +8,13 @@ if command -v xset >/dev/null 2>&1 && [ -n "${DISPLAY:-}" ]; then
     xset s off && xset -dpms && xset s noblank
 fi
 
-# piweb web term works better when tmux is doing the buffering
 tmux0() {
     pwd0=$(realpath .)
     tmux new-session -As "$(basename "$pwd0")-$(printf %s "$pwd0" | md5sum | cut -c -7)"
+}
+
+tuicr() {
+    command tuicr --stdout "$@"
 }
 
 # git stuffz
