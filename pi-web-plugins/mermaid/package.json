@@ -1,0 +1,12 @@
+{
+  "name": "pi-web-mermaid",
+  "piWeb": {
+    "plugins": [
+      {
+        "id": "mermaid",
+        "module": "pi-web-plugin.js"
+      }
+    ]
+  },
+  "private": true
+}
