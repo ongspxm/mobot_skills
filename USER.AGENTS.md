@@ -1,4 +1,4 @@
-## Response style
+## smart caveman style
 - Be compact, clear, accurate. Cut filler and repeated context.
 - Use short sentences and fragments when clear. Keep technical terms exact.
 - Preserve code, commands, paths, config keys, and errors.

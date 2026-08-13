@@ -23,3 +23,11 @@ USER.AGENTS.md is meant to be saved at the user's home directory, and loaded in 
 
 # pi settings
 pi.settings.json should be appended to ~/.pi/agents/settings.json as some sanes defaults
+
+# pi-subagents
+subagents definition sit here. this is in alignemnt to https://github.com/ongspxm/pi-subagent
+should be linked to ~/.pi/agent/agents
+
+# pi-web plugins
+ui plugins for piweb.dev
+should be linked to ~/.pi-web/plugins
