@@ -12,7 +12,7 @@ function moveTab(direction) {
 }
 
 export default {
-  apiVersion: 1,
+  apiVersion: 2,
   name: "Terminal Hotkeys",
   activate: () => ({
     contributions: {

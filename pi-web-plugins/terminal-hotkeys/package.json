@@ -2,6 +2,7 @@
   "piWeb": {
     "plugins": [
       {
+        "browserRoot": ".",
         "id": "terminal-hotkeys",
         "module": "pi-web-plugin.js"
       }

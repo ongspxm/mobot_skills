@@ -3,6 +3,7 @@
   "piWeb": {
     "plugins": [
       {
+        "browserRoot": ".",
         "id": "mermaid",
         "module": "pi-web-plugin.js"
       }

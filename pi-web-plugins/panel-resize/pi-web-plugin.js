@@ -33,7 +33,7 @@ function move(direction) {
 }
 
 export default {
-  apiVersion: 1,
+  apiVersion: 2,
   name: "Panel Resize",
   activate: () => ({
     contributions: {

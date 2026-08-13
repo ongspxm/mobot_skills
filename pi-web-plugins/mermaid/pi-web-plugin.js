@@ -62,7 +62,7 @@ function watch(root) {
 }
 
 export default {
-  apiVersion: 1,
+  apiVersion: 2,
   name: "Mermaid Diagrams",
   activate: () => {
     watch(document);

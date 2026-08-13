@@ -2,6 +2,7 @@
   "piWeb": {
     "plugins": [
       {
+        "browserRoot": ".",
         "id": "panel-resize",
         "module": "pi-web-plugin.js"
       }

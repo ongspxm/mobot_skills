@@ -3,6 +3,7 @@
   "piWeb": {
     "plugins": [
       {
+        "browserRoot": ".",
         "id": "panel-swap",
         "module": "pi-web-plugin.js"
       }
