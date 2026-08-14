@@ -30,6 +30,29 @@ Keep notebooks simple. One global name, one owner cell. Use local `_scratch` nam
 - Use `mo.state(initial)` for persistent interactive state.
 - Layout: `mo.hstack([...])` for rows, `mo.vstack([...])` for columns.
 
+## Export figures
+When creating figures, save them by default for later inspection.
+
+- Save to `/tmp/marimo-exports/<notebook-name>/`.
+- Create the directory first.
+- Use stable, descriptive filenames so reruns overwrite the latest image.
+- Report the saved paths.
+
+```python
+from pathlib import Path
+
+export_dir = Path("/tmp/marimo-exports/my-notebook")
+export_dir.mkdir(parents=True, exist_ok=True)
+
+fig.savefig(export_dir / "overview.png")       # Matplotlib
+fig.write_image(export_dir / "overview.png")   # Plotly
+chart.save(export_dir / "overview.png")        # Altair
+```
+
+## Run notebooks
+Execute the notebook and its side effects with: `uv run notebook.py`
+This also writes exported figures to the configured `/tmp/marimo-exports/...` path.
+
 ## Examples
 Compact full pattern: setup, globals, locals, UI, state, button, reactive output, layout.
 
