@@ -17,6 +17,17 @@ tuicr() {
     command tuicr --stdout "$@"
 }
 
+sshport() {
+    local box=$1
+    shift
+    local -a ssh_args=()
+    for port in "$@"; do
+        ssh_args+=(-L "$port:localhost:$port")
+    done
+    # shellcheck disable=SC2029
+    ssh "${ssh_args[@]}" "$box"
+}
+
 # git stuffz
 alias gitpush="git pull --rebase && git push"
 alias gwt="git worktree"
