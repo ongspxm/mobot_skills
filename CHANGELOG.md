@@ -9,6 +9,7 @@ and this project uses [CalVer](https://calver.org/) in `YYYY.MM.DD` format.
 
 ### Added
 - `meagent-daily-logging`: added a `run` subcommand for explicit execution and backfill workflow.
+- `ponytail`: added on-demand investigation, design, implementation, debugging, and review playbooks plus focused engineering tools.
 
 ### Changed
 - `push-public`: skill now requires reading the full diff and groups mixed changes into separate commits by concern.
