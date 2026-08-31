@@ -18,6 +18,7 @@ tuicr() {
 }
 
 sshport() {
+    echo "sshport <box> <port>..."
     local box=$1
     shift
     local -a ssh_args=()
