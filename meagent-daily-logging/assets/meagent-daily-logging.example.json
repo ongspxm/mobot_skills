@@ -1,11 +1,11 @@
 {
   "api_hash": "replace-with-telegram-api-hash",
   "api_id": 123456,
-  "bot_token": "123456789:replace-with-bot-token",
   "chats": {
     "ann": -1001987654321,
     "ops": -1001234567890
   },
   "log_folder": "~/notes/meagent-daily-logging",
+  "session_string": "",
   "timezone": "America/Los_Angeles"
 }

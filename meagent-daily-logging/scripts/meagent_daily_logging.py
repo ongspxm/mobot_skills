@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#   "telethon",
+# ]
+# ///
 import argparse
 import asyncio
 import getpass
 import json
 import os
 import sys
+import tempfile
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -50,12 +57,13 @@ def parse_chats(cfg: dict) -> list[tuple[int, str]]:
 
 
 async def collect_entries(
-    cfg: dict, chats: list[tuple[int, str]], session_path: Path, start_local: datetime, end_local: datetime
+    cfg: dict, chats: list[tuple[int, str]], config_path: Path, start_local: datetime, end_local: datetime
 ) -> list[tuple[datetime, str, str]]:
     try:
         from telethon import TelegramClient
+        from telethon.sessions import StringSession
     except ModuleNotFoundError as exc:
-        raise CliError("missing dependency: telethon (run with `uv run --with=telethon ...`)") from exc
+        raise CliError("missing dependency: telethon (run with `uv run ...`)") from exc
 
     try:
         api_id = int(cfg.get("api_id"))
@@ -64,61 +72,62 @@ async def collect_entries(
     api_hash = str(cfg.get("api_hash") or "").strip()
     if not api_hash:
         raise CliError("missing required config key: api_hash")
+    session_string = cfg.get("session_string", "")
+    if not isinstance(session_string, str):
+        raise CliError("invalid config key: session_string must be a string")
+    session_string = session_string.strip()
 
     try:
-        for retry in range(2):
-            client = TelegramClient(str(session_path), api_id, api_hash)
-            await client.connect()
-            try:
-                await client.start(
-                    phone=(lambda: input("Please enter your phone: ")),
-                    password=(lambda: getpass.getpass("Please enter your password: ")),
-                )
-                me = await client.get_me()
-                if not me or getattr(me, "bot", False):
-                    if retry:
-                        raise CliError(
-                            "failed to authenticate user account; session resolved to a bot account"
-                        )
-                    try:
-                        await client.log_out()
-                    except Exception:
-                        pass
-                    for extra in ("", "-journal", "-shm", "-wal"):
+        session = StringSession(session_string)
+        async with TelegramClient(session, api_id, api_hash) as client:
+            await client.start(
+                phone=lambda: input("Please enter your phone: "),
+                password=lambda: getpass.getpass("Please enter your password: "),
+            )
+            new_session_string = client.session.save()
+            if new_session_string != session_string:
+                cfg["session_string"] = new_session_string
+                config_path.parent.mkdir(parents=True, exist_ok=True)
+                tmp_path: Path | None = None
+                try:
+                    with tempfile.NamedTemporaryFile(
+                        mode="w", encoding="utf-8", dir=config_path.parent, delete=False
+                    ) as config_tmp:
+                        tmp_path = Path(config_tmp.name)
+                        config_tmp.write(json.dumps(cfg, indent=2, sort_keys=True) + "\n")
+                    os.chmod(tmp_path, 0o600)
+                    os.replace(tmp_path, config_path)
+                    os.chmod(config_path, 0o600)
+                finally:
+                    if tmp_path is not None:
                         try:
-                            (session_path.parent / f"{session_path.name}{extra}").unlink()
+                            tmp_path.unlink()
                         except FileNotFoundError:
                             pass
-                    continue
 
+            out: list[tuple[datetime, str, str]] = []
+            for chat_id, tag in chats:
                 try:
-                    os.chmod(session_path, 0o600)
-                except OSError:
-                    pass
-
-                out: list[tuple[datetime, str, str]] = []
-                for chat_id, tag in chats:
-                    try:
-                        entity = await client.get_entity(chat_id)
-                    except Exception as exc:
-                        raise CliError(f"failed to resolve chat target {chat_id!r}: {exc}") from exc
-                    async for msg in client.iter_messages(entity, offset_date=end_local+timedelta(days=1)):
-                        if msg.date is None:
-                            continue
-                        msg_local = msg.date.astimezone(start_local.tzinfo)
-                        txt = (msg.message or "").strip()
-                        if msg_local >= end_local:
-                            continue
-                        if msg_local < start_local:
-                            break
-                        text = "\n".join([l for l in txt.split("\n") if l.strip()])
-                        if text:
-                            out.append((msg_local, tag, text))
-                out.sort(key=lambda x: x[0])
-                return out
-            finally:
-                await client.disconnect()
-        raise CliError("failed to establish a user-authenticated Telegram session")
+                    entity = await client.get_entity(chat_id)
+                except Exception as exc:
+                    raise CliError(f"failed to resolve chat target {chat_id!r}: {exc}") from exc
+                async for msg in client.iter_messages(
+                    entity, offset_date=end_local + timedelta(days=1)
+                ):
+                    if msg.date is None:
+                        continue
+                    msg_local = msg.date.astimezone(start_local.tzinfo)
+                    if msg_local >= end_local:
+                        continue
+                    if msg_local < start_local:
+                        break
+                    text = "\n".join(
+                        line for line in (msg.message or "").strip().splitlines() if line.strip()
+                    )
+                    if text:
+                        out.append((msg_local, tag, text))
+            out.sort(key=lambda x: x[0])
+            return out
     except CliError:
         raise
     except Exception as exc:
@@ -200,7 +209,7 @@ async def run() -> int:
         raise CliError(f"invalid timezone: {tz_name}") from exc
     run_day = args.date
     if run_day is None:
-        run_day = datetime.now(tz).astimezone(tz).date() - timedelta(days=1)
+        run_day = datetime.now(tz).date() - timedelta(days=1)
 
     raw_log_folder = cfg.get("log_folder")
     if raw_log_folder is None:
@@ -210,21 +219,11 @@ async def run() -> int:
         if not folder_text:
             raise CliError("invalid config key: log_folder cannot be blank")
         log_folder = Path(folder_text).expanduser()
-    if not str(log_folder).strip():
-        raise CliError("invalid config key: log_folder cannot be blank")
 
     start_local = datetime.combine(run_day, time(2, 0), tzinfo=tz)
     end_local = start_local + timedelta(days=1)
 
-    botbot_home = Path.home() / ".botbot"
-    botbot_home.mkdir(parents=True, exist_ok=True)
-    try:
-        os.chmod(botbot_home, 0o700)
-    except OSError:
-        pass
-    session_path = botbot_home / "meagent-daily-logging.session"
-
-    entries = await collect_entries(cfg, parse_chats(cfg), session_path, start_local, end_local)
+    entries = await collect_entries(cfg, parse_chats(cfg), cfg_path, start_local, end_local)
 
     month_file = log_folder / f"{start_local:%Y-%m}.md"
     log_lines: list[str] = []

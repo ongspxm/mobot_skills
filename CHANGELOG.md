@@ -15,4 +15,6 @@ and this project uses [CalVer](https://calver.org/) in `YYYY.MM.DD` format.
 - `push-public`: skill now requires reading the full diff and groups mixed changes into separate commits by concern.
 - `meagent-daily-logging`: month file updates now rebuild by date chunks and persist output sorted from oldest to newest.
 - `meagent-daily-logging`: daily window filtering now uses local timezone-aware comparisons end-to-end, fixing missed boundary messages.
+- `meagent-daily-logging`: aligned configuration docs with user-authenticated Telethon sessions and removed stale bot-session handling.
+- `meagent-daily-logging`: stores the Telethon authentication as a `session_string` in config instead of a session file.
 - Replaced `botbot-reuters` with a compact multi-source `botbot-news` skill and script.
