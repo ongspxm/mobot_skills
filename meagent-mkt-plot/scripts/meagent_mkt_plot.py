@@ -1,10 +1,22 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "matplotlib",
+#     "pandas",
+#     "yfinance",
+# ]
+# ///
 import argparse
 import json
 import math
 import re
 import sys
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import yfinance as yf
 
 
 class CliError(RuntimeError):
@@ -59,11 +71,6 @@ def load_config(path: Path) -> dict[str, list[str]]:
 
 
 def fetch_close_series(ticker: str, period: str, interval: str):
-    try:
-        import yfinance as yf
-    except ModuleNotFoundError as exc:
-        raise CliError("missing dependency: yfinance (run with `uv run --with=yfinance ...`)") from exc
-
     try:
         frame = yf.download(
             ticker,
@@ -150,15 +157,6 @@ def slugify(tag: str) -> str:
 
 
 def write_table_image(rows: list[dict[str, object]], path: Path) -> None:
-    try:
-        import pandas as pd
-    except ModuleNotFoundError as exc:
-        raise CliError("missing dependency: pandas (installed with yfinance)") from exc
-    try:
-        import matplotlib.pyplot as plt
-    except ModuleNotFoundError as exc:
-        raise CliError("missing dependency: matplotlib (run with `uv run --with=matplotlib ...`)") from exc
-
     ordered = []
     for row in sorted(rows, key=lambda item: (str(item["group"]), str(item["ticker"]))):
         ordered.append(
@@ -179,7 +177,6 @@ def write_table_image(rows: list[dict[str, object]], path: Path) -> None:
         columns=["group", "ticker", "price", "pct_1d", "pct_1w", "pct_4w", "pct_12w", "pct_52w", "vol_ann"],
     )
     pct_cols = {"pct_1d", "pct_1w", "pct_4w", "pct_12w", "pct_52w"}
-    col_idx = {name: idx for idx, name in enumerate(frame.columns)}
     rows_n = max(len(frame), 1)
     fig_h = max(3.0, min(18.0, 1.1 + rows_n * 0.42))
     fig, ax = plt.subplots(figsize=(14, fig_h))
@@ -249,11 +246,6 @@ def run() -> int:
 
     cfg_path = Path.home() / ".botbot" / "meagent-mkt-plot.json"
     groups = load_config(cfg_path)
-
-    try:
-        import matplotlib.pyplot as plt
-    except ModuleNotFoundError as exc:
-        raise CliError("missing dependency: matplotlib (run with `uv run --with=matplotlib ...`)") from exc
 
     output_dir = Path("/tmp")
     output_dir.mkdir(parents=True, exist_ok=True)

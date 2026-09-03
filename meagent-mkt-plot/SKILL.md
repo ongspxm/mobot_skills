@@ -1,40 +1,42 @@
 ---
 name: meagent-mkt-plot
-description: Use when you need daily multi-horizon market comparison charts with normalized lines and CSV summary metrics.
+description: Use when you need daily market charts and a PNG summary table sent to Telegram.
 ---
 
 # Meagent Market Plot
 
-## Workflows
-```bash
-uv run --with=yfinance --with=matplotlib <path-to-skill>/scripts/meagent_mkt_plot.py run
-```
+## Workflow
 
-## When to Use
+1. Run the script:
+
+   ```bash
+   uv run <path-to-skill>/scripts/meagent_mkt_plot.py run
+   ```
+
+2. Send every PNG it makes directly with `botbot-telesend`. Do not send only file paths or links. Put the files in one send when there are 2-10 files:
+
+   ```bash
+   uv run <path-to-botbot-telesend>/scripts/botbot_telesend.py send \
+     --text "Market plots" \
+     --img /tmp/overview.png \
+     --img /tmp/<tag>.png
+   ```
+
+   For more than 10 files, send batches of 10. Use the real tag file names from the script output.
+
+## Output
+
 - Reads groups from `~/.botbot/meagent-mkt-plot.json`.
-- Generates one PNG chart per tag/group in `/tmp`.
-- Each chart has 4 subplots: `1w`, `4w`, `12w`, `52w`.
-- Each subplot uses normalized series starting at `100`.
-- Each subplot includes dotted baseline at `100` and visible grid.
-- Legends are outside the plot area.
-- Legend format: `TICKER (1d +1.2%)` (window token changes by panel).
-- Legend change window mapping:
-  - `1w` panel -> `1d`
-  - `4w` panel -> `1w`
-  - `12w` panel -> `4w`
-  - `52w` panel -> `12w`
-- Stdout is strict CSV only with one stable schema:
-  - `ticker,price,pct_1d,pct_1w,pct_4w,pct_12w,pct_52w,vol_ann`
-- Non-tabular events/warnings are printed to stderr.
-- Partial failure tolerant:
-  - bad ticker data is skipped with warning
-  - missing panel/window data is skipped with warning
-  - run fails only when no ticker has valid daily data
+- Writes `overview.png` and one PNG per tag to `/tmp`.
+- Each tag chart has four panels: `1w`, `4w`, `12w`, and `52w`.
+- Each line starts at `100`.
+- Each panel has a dotted `100` line, a grid, and a legend outside the plot.
+- Legend change windows are `1d`, `1w`, `4w`, and `12w` for the four panels.
+- Bad tickers and missing panels are skipped with a warning. The run fails only when no ticker has daily data.
 
 ## Configuration
-JSON `tag -> [tickers...]` at `~/.botbot/meagent-mkt-plot.json`.
 
-Example:
+Use a JSON object at `~/.botbot/meagent-mkt-plot.json`:
 
 ```json
 {
@@ -45,9 +47,4 @@ Example:
 }
 ```
 
-Add/remove tags for chart groups and tickers for lines; rename a tag to change its output filename prefix.
-
-## Examples
-```bash
-uv run --with=yfinance --with=matplotlib <path-to-skill>/scripts/meagent_mkt_plot.py run
-```
+Each key makes one chart. Each list item makes one line.
