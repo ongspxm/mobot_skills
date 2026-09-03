@@ -1,6 +1,6 @@
 ---
 name: ponytail
-description: Use for coding and software engineering tasks.
+description: Always read before doing anything code related.
 ---
 
 # Ponytail
