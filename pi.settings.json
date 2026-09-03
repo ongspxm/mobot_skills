@@ -5,7 +5,7 @@
     "npm:@schultzp2020/pi-cursor",
     "npm:pi-web-access",
     "npm:@the-agency/pi-hashline-edit",
-    "git:github.com/ongspxm/pi-subagent",
+    "git:github.com/markhougaard/pi-subagent",
     "git:github.com/ongspxm/choppi"
   ],
   "theme": "dark"
