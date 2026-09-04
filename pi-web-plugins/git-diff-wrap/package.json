@@ -1,0 +1,13 @@
+{
+  "name": "pi-web-git-diff-wrap",
+  "piWeb": {
+    "plugins": [
+      {
+        "browserRoot": ".",
+        "id": "git-diff-wrap",
+        "module": "pi-web-plugin.js"
+      }
+    ]
+  },
+  "private": true
+}
