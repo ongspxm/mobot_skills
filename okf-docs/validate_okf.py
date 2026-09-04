@@ -1,5 +1,6 @@
 import os
 import re
+import subprocess
 import sys
 from datetime import datetime, timezone
 
@@ -23,6 +24,26 @@ def extract_valid_tags(root_index_path):
         content = f.read()
     return set(re.findall(r'#([a-zA-Z0-9_\-]+)', content))
 
+def get_changed_docs(root):
+    """Return docs with content changes, ignoring timestamp-only edits."""
+    result = subprocess.run(
+        ['git', 'diff', '--name-only', '--diff-filter=ACMRTUXB',
+         '-I', r'^timestamp:.*$', 'HEAD', '--', 'docs'],
+        cwd=root, check=True, capture_output=True, text=True,
+    )
+    return set(result.stdout.splitlines())
+
+def extract_timestamp(content):
+    match = re.search(r'^timestamp:\s*(.*?)\s*$', content, re.MULTILINE)
+    return match.group(1) if match else None
+
+def get_head_timestamp(root, rel_path):
+    result = subprocess.run(
+        ['git', 'show', f'HEAD:{rel_path}'],
+        cwd=root, capture_output=True, text=True,
+    )
+    return extract_timestamp(result.stdout) if result.returncode == 0 else None
+
 def validate_docs():
     root = get_repo_root()
     docs_dir = os.path.join(root, 'docs')
@@ -33,11 +54,13 @@ def validate_docs():
     allowed_tags = extract_valid_tags(os.path.join(docs_dir, 'index.md'))
 
     errors = []
+    changed_docs = get_changed_docs(root)
     link_patterns = (
         re.compile(r'!?\[[^\]]*\]\(\s*(<[^>]*>|[^)\s]+)'),
         re.compile(r'!\[\[([^]|#]+)'),
     )
     markdown_files = []
+    updated_timestamps = []
 
     for dirpath, _, filenames in os.walk(docs_dir):
         for filename in filenames:
@@ -47,30 +70,30 @@ def validate_docs():
             filepath = os.path.join(dirpath, filename)
             rel_path = os.path.relpath(filepath, root)
 
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, encoding='utf-8') as f:
                 content = f.read()
-            markdown_files.append((rel_path, content))
 
             if filename not in ['log.md', 'index.md']:
                 if not content.startswith('---'):
                     errors.append(f"{rel_path}: Missing YAML frontmatter")
                     continue
 
-                stat = os.stat(filepath)
-                timestamp = datetime.fromtimestamp(stat.st_mtime, timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
                 frontmatter = re.match(r'\A---\n(.*?)\n---', content, re.DOTALL)
                 if frontmatter:
-                    header = frontmatter.group(1)
-                    if re.search(r'^timestamp:.*$', header, re.MULTILINE):
-                        header = re.sub(r'^timestamp:.*$', f'timestamp: {timestamp}', header, count=1, flags=re.MULTILINE)
-                    else:
-                        header += f'\ntimestamp: {timestamp}'
-                    updated = f'---\n{header}\n---' + content[frontmatter.end():]
-                    if updated != content:
+                    current = extract_timestamp(frontmatter.group(1))
+                    changed = rel_path in changed_docs and current == get_head_timestamp(root, rel_path)
+                    # Refresh timestamp using git state.
+                    if current is None or changed:
+                        timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+                        header = frontmatter.group(1)
+                        if current is None:
+                            header += f'\ntimestamp: {timestamp}'
+                        else:
+                            header = re.sub(r'^timestamp:.*$', f'timestamp: {timestamp}', header, 1, re.MULTILINE)
+                        content = f'---\n{header}\n---' + content[frontmatter.end():]
                         with open(filepath, 'w', encoding='utf-8') as f:
-                            f.write(updated)
-                        os.utime(filepath, ns=(stat.st_atime_ns, stat.st_mtime_ns))
-                        content = updated
+                            f.write(content)
+                        updated_timestamps.append(rel_path)
 
                 try:
                     meta = yaml.safe_load(content.split('---')[1]) or {}
@@ -83,6 +106,8 @@ def validate_docs():
                             errors.append(f"{rel_path}: Tag '#{tag}' is not registered in docs/index.md")
                 except Exception as e:
                     errors.append(f"{rel_path}: Invalid YAML formatting ({str(e).strip()})")
+
+            markdown_files.append((rel_path, content))
 
     # Check local Markdown links and embeds relative to each source file.
     for rel_path, content in markdown_files:
@@ -108,6 +133,8 @@ def validate_docs():
             print(err)
         sys.exit(1)
 
+    if updated_timestamps:
+        print('Updated timestamps: ' + ', '.join(updated_timestamps))
     print("OKF docs validation passed successfully.")
     sys.exit(0)
 

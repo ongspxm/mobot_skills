@@ -47,4 +47,4 @@ After creating or changing docs, run:
 uv run --with pyyaml $skill_dirname/validate_okf.py
 ```
 
-The validator syncs concept timestamps and checks frontmatter, tags, and links.
+The validator updates timestamps only for real content changes detected against `HEAD`; it checks frontmatter, tags, and links without using filesystem modification times.
