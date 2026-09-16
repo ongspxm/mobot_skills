@@ -100,17 +100,24 @@ def _parse_tldr(body: str) -> list[tuple[str, str, str]]:
 def _parse_aisecret(body: str) -> list[tuple[str, str, str]]:
     lines = [line.strip() for line in body.splitlines()]
     items: list[tuple[str, str, str]] = []
+    junk = ("by ", "hi,", "plus:", "read ", "sign up", "advertise", "unsubscribe",
+            "together", "more like", "less like", "reach out", "email our")
     for index, line in enumerate(lines):
-        if line.startswith("TL;DR:") and (
-            match := re.search(r"Read more\s*(?:\u2192|->)\s*\((https?://[^)\s]+)\)", line)
-        ):
-            title = next(
-                (value for value in reversed(lines[:index])
-                 if value and not URL_RE.fullmatch(value.strip("()"))),
-                "",
-            )
-            if title:
-                items.append((title, line.split("Read more", 1)[0].rstrip(), match.group(1)))
+        match = re.search(r"Read more\s*(?:\u2192|->)?\s*\((https?://[^)\s]+)\)", line, re.IGNORECASE)
+        if not match:
+            continue
+        desc = line[:match.start()].strip()
+        if len(desc) < 20:
+            continue
+        title = next(
+            (v for value in reversed(lines[:index])
+             if (v := value.strip().strip("()")) and "|" not in v and "@" not in v
+             and len(v) <= 100 and not URL_RE.fullmatch(v)
+             and not v.lower().startswith(junk)),
+            "",
+        )
+        if title:
+            items.append((title, desc, match.group(1)))
 
     for index, line in enumerate(lines):
         if not URL_RE.fullmatch(line.strip("()")):

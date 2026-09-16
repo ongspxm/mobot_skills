@@ -98,6 +98,28 @@ Midjourney Sells Horoscopes Now
             ],
         )
 
+    def test_read_more_is_prefix_agnostic(self):
+        body = """Future Title
+(https://x.example/a)
+Why it matters: new prefix here. Read more (https://x.example/b)
+"""
+        self.assertEqual(
+            newsletter._parse_aisecret(body),
+            [("Future Title", "Why it matters: new prefix here.", "https://x.example/b")],
+        )
+
+    def test_hardwire_format(self):
+        body = """Scooter Drinks Its Own Sun
+
+(https://thehardwire.com/r/img)
+
+What is it: solar scooter. Read more \u2192 (https://thehardwire.com/r/real)
+"""
+        self.assertEqual(
+            newsletter._parse_aisecret(body),
+            [("Scooter Drinks Its Own Sun", "What is it: solar scooter.", "https://thehardwire.com/r/real")],
+        )
+
     def test_legacy_formats_remain_supported(self):
         body = """TITLE [1]
 
