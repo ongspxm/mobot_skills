@@ -73,7 +73,7 @@ def validate_docs():
             with open(filepath, encoding='utf-8') as f:
                 content = f.read()
 
-            if filename not in ['log.md', 'index.md']:
+            if filename not in {'index.md', 'adr_log.md'}:
                 if not content.startswith('---'):
                     errors.append(f"{rel_path}: Missing YAML frontmatter")
                     continue

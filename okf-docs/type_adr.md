@@ -1,65 +1,37 @@
-# STANDARD ARCHITECTURE DECISION RECORD (ADR)
+# ARCHITECTURE DECISION RECORD (ADR)
+
+Use one short, dated entry in `docs/adr_log.md` for every decision. Keep entries newest first.
+
+## FORMAT
 
 ```markdown
----
-type: adr
-title: "<Action-oriented title>"
-tags: [<tags from docs/index.md>]
-timestamp: <ISO 2026-07-09T09:38:26Z string>
----
+# [Project name] Architecture Decision Record
+This is the decision log. Add new Y-statements at the top, newest first. Keep each entry short and concrete.
 
-# [Decision Name]
+## 2026-07-09: ([Proposed | Accepted | Rejected | Superseded]) [Decision]
+[Y-statement]
 
-Status=[Proposed | Accepted | Superseded by Link]
-
-## Context
-[Problem, durable constraints, and options.]
-
-## Decision
-[Chosen architectural direction, alternatives and why it wins.]
-
-## Consequences
-[Durable gains, costs, risks, limits, and migration impact.]
+## 2026-01-01: (Accepted) Example decision
+In the context of documenting decisions, considering the need for an example, we decided for a short Y-statement against a long template, to achieve fast writing, accepting less detail. #optional_tag
 ```
 
-# ADR STRUCTURE
+A Y-statement has six parts: context, concern, chosen option, alternatives considered against it, intended quality, and accepted downside. Use: `In the context of [context], considering [concern], we decided for [option] against [alternatives], to achieve [quality], accepting [downside].`
 
-ADRs record final architecture choices. Use RDRs for research and iterations.
+## SCOPE
 
-Nygard order: **Context -> Decision -> Consequences**.
+Record the architectural what and why, not code-level how. Keep implementation steps, task lists, test cases, and current system documentation elsewhere.
 
-- **Context**: problem, facts, constraints, options. No rationale or tradeoffs.
-- **Decision**: chosen architecture and rationale. Name a product, protocol, or pattern only when its selection is the decision.
-- **Consequences**: durable gains, costs, limits, risks, follow-up, migration impact. Use `Good:` and `Cost:` when useful.
+## HISTORY
 
-## EXCLUDE IMPLEMENTATION DETAILS
+A decision record captures what was decided at the time. Do not rewrite its rationale to match later events.
 
-Record architectural **what** and **why**, not code-level **how**.
+- To change a decision, add a new dated entry and link to the earlier entry.
+- Use `Superseded` when a later decision replaces an earlier one.
+- Use `Rejected` when a considered option is not chosen; keep the entry as history.
+- Keep research details in an RDR: `$skill_dirname/type_rdr.md`.
 
-Exclude code, file/class/function names, API routes and fields, schemas, UI layouts, config values, task lists, test cases, and step-by-step build, rollout, or migration instructions. Put them in a design/RFC, runbook, README, issue, PR, or code.
+## INSTRUCTIONS
 
-Rule of thumb: if a normal refactor makes the ADR incorrect, remove or generalize that detail.
-
-Exception: include an implementation detail when it is the architecture choice, such as Kafka for asynchronous event delivery.
-
-Example: **Decision**: retain original history; do not map source messages to relayed messages. **Consequences**: simpler state; edits become extra messages, not in-place updates.
-
-# INSTRUCTIONS
-
-1. Get Context, Decision, and Consequences from input or Git diff.
-2. Keep rationale in `## Decision`; benefits and costs in `## Consequences`; exclude code-level detail.
-3. Create `$REPO_ROOT/docs/decisions/YYYY-MM-DD-<slug>.md`.
-4. Add an entry at the top of its date in `$REPO_ROOT/docs/decisions/log.md`.
-
-# `log.md` FORMAT
-
-```markdown
-# Directory Update Log
-
-## 2026-07-09
-- (create) Established 2026-07-09-use-postgres.md to move ledger data out of flat files.
-- (update) Added database tags to root index file.
-
-## 2026-06-15
-- (delete) Deprecated custom JWT auth scheme in 2025-11-04-custom-auth.md.
-```
+1. Add a Y-statement to the top of `docs/adr_log.md`.
+2. Add a link to an RDR when research supports the decision.
+3. Run the OKF validator.

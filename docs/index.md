@@ -10,4 +10,4 @@ Docs for mobot_skills, a collection of Pi agent skills and shared automation gui
 - [Write Concise Task-Oriented Skills](./skill-authoring.md)
 
 ## Knowledge Maps
-- [Decision Logs](./decisions/index.md)
+- [Decision Log](./adr_log.md)

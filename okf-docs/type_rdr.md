@@ -15,7 +15,7 @@ timestamp: <ISO 2026-07-09T09:38:26Z string>
 - **Question:** What problem are you trying to solve?
 - **Hypothesis:** "If I try [X], then [Y] will happen because [Z]."
 - **Success signal:** What result would support or reject it?
-- **Prior work:** [Related RDR, issue, paper, or ADR]
+- **Prior work:** [Related RDR, issue, paper, or decision-register entry]
 
 ## 2. Experiments Tried
 
@@ -41,7 +41,7 @@ timestamp: <ISO 2026-07-09T09:38:26Z string>
 
 - **Status:** [Abandoned | Paused | Succeeded]
 - **Outcome:** What do the findings support, and what did you choose to do?
-- **Decision record:** [ADR link, if a final architecture choice was made]
+- **Decision record:** [Decision-register entry, if a final choice was made]
 
 ## 4. Next Actions
 
@@ -51,7 +51,7 @@ timestamp: <ISO 2026-07-09T09:38:26Z string>
 
 # USE
 
-Use one RDR per research thread. Append new attempts in order; do not rewrite failed attempts. Link exact raw evidence so a teammate can reproduce the conclusion. When research produces a final architecture choice, create or update a separate ADR.
+Use one RDR per research thread. Append new attempts in order; do not rewrite failed attempts. Link exact raw evidence so a teammate can reproduce the conclusion. When research produces a final choice, add a Y-statement to the decision register.
 
 # INSTRUCTIONS
 

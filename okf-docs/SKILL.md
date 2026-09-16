@@ -1,34 +1,37 @@
 ---
 id: okf-docs
 name: okf-docs
-description: Use when you need to generate, maintain, or validate OKF repository documentation components.
+description: Create, update, and check OKF repository docs.
 ---
 
 # OKF Documentation
 
-Use OKF docs for one standalone idea, decision, or record per file.
+Use one idea per concept file. Keep decisions in `docs/adr_log.md` as a dated list, newest first.
 
 ## Rules
-- Every `.md` file under `docs/`, except `index.md` and `log.md`, is an OKF concept.
+
+- Every `.md` file under `docs/`, except `index.md` and `adr_log.md`, is a concept.
 - Each concept needs YAML frontmatter with `type`, `title`, `tags`, and `timestamp`.
-- Tags must be registered in `docs/index.md`; explain every non-obvious tag there.
-- Use project, system-constraint, and environment context in titles and descriptions.
-- During initialization, create only `docs/index.md`. Add subfolders, indexes, or logs only when the task requires them.
+- Register all tags in `docs/index.md`.
+- Include useful project and environment context.
+- At setup, create only `docs/index.md`. Add folders or indexes when needed.
 
-## Concept Types
-Common types:
-- `guide`: setup and normal workflows.
-- `runbook`: repeatable operational procedures and troubleshooting.
-- `adr`: architectural "why" decisions.
-- `rdr`: experiments and exploratory research.
-- `reference`: factual system or component documentation.
+## Types
 
-This list is not exhaustive. Any reasonable, descriptive concept type is valid.
+- `guide`: setup and normal use.
+- `runbook`: repeatable tasks and fixes.
+- `adr`: decisions and their reasons.
+- `rdr`: experiments and research.
+- `reference`: facts about a system or part.
 
-Use standard ADRs for final architecture choices: `$skill_dirname/type_adr.md`.
-Use RDRs for exploratory work, including hypotheses, experiments, failures, current state, and next actions: `$skill_dirname/type_rdr.md`.
+Other clear types are allowed.
+
+Use `type_adr.md` for decisions. Record each one as a short Y-statement in `docs/adr_log.md`. Do not create separate ADR files.
+
+Use `type_rdr.md` for research, including hypotheses, tests, failures, current state, and next steps.
 
 ## Format
+
 ```yaml
 ---
 type: guide
@@ -38,13 +41,14 @@ timestamp: 2026-07-09T22:04:00Z
 ---
 ```
 
-`docs/index.md` is the root map for project context, registered tags, and any knowledge maps. Create separate map folders only when useful and requested. Knowledge maps should group concepts by purpose or type and expose useful metadata such as date and status, not only repeat a bare file list.
+`docs/index.md` maps project context, tags, and other knowledge maps. Maps should group docs by purpose or type and show useful details such as dates and status.
 
 ## Workflow
-After creating or changing docs, run:
+
+After changing docs, run:
 
 ```sh
 uv run --with pyyaml $skill_dirname/validate_okf.py
 ```
 
-The validator updates timestamps only for real content changes detected against `HEAD`; it checks frontmatter, tags, and links without using filesystem modification times.
+The validator updates timestamps only for real content changes. It checks frontmatter, tags, and links.
