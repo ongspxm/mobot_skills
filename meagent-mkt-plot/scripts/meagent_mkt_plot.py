@@ -26,10 +26,10 @@ WINDOW_DAYS = {
 
 
 PANELS = [
-    {"horizon": "1w", "period": "7d", "interval": "30m", "legend_window": "1d"},
-    {"horizon": "4w", "period": "1mo", "interval": "60m", "legend_window": "1w"},
-    {"horizon": "12w", "period": "3mo", "interval": "1d", "legend_window": "4w"},
-    {"horizon": "52w", "period": "1y", "interval": "1d", "legend_window": "12w"},
+    {"horizon": "1w", "period": "7d", "interval": "30m"},
+    {"horizon": "4w", "period": "1mo", "interval": "60m"},
+    {"horizon": "12w", "period": "3mo", "interval": "1d"},
+    {"horizon": "52w", "period": "1y", "interval": "1d"},
 ]
 
 
@@ -290,7 +290,6 @@ def run() -> int:
             horizon = panel["horizon"]
             interval = panel["interval"]
             period = panel["period"]
-            legend_window = panel["legend_window"]
 
             axis.set_title(horizon)
             axis.axhline(100.0, linestyle=":", linewidth=1.1, color="gray")
@@ -316,12 +315,17 @@ def run() -> int:
                     )
                     continue
                 normalized = (series / start) * 100.0
-                legend_value = metrics_by_ticker[ticker][f"pct_{legend_window}"]
+                legend_value = metrics_by_ticker[ticker][f"pct_{horizon}"]
+                legend_label = f"{ticker} {horizon}:{fmt_legend_change(legend_value)}"
+                daily = daily_cache.get(ticker)
+                days = WINDOW_DAYS[horizon]
+                if daily is not None and len(daily) > days:
+                    legend_label += f", {float(daily.iloc[-1 - days]):.2f} to {float(daily.iloc[-1]):.2f}"
                 axis.plot(
                     normalized.index,
                     normalized.values,
                     linewidth=1.8,
-                    label=f"{ticker} {legend_window}:{fmt_legend_change(legend_value)}",
+                    label=legend_label,
                     drawstyle="steps-post",
                 )
                 subplot_has_line = True

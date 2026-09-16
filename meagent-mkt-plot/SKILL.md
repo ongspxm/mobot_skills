@@ -22,7 +22,7 @@ Send the images directly.
 - Each tag chart has four panels: `1w`, `4w`, `12w`, and `52w`.
 - Each line starts at `100`.
 - Each panel has a dotted `100` line, a grid, and a legend outside the plot.
-- Legend change windows are `1d`, `1w`, `4w`, and `12w` for the four panels.
+- Each panel legend shows the change over its own window, with start and end values.
 - Bad tickers and missing panels are skipped with a warning. The run fails only when no ticker has daily data.
 
 ## Configuration
