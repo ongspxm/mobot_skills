@@ -3,7 +3,6 @@
 # requires-python = ">=3.10"
 # dependencies = [
 #     "matplotlib",
-#     "pandas",
 #     "yfinance",
 # ]
 # ///
@@ -15,13 +14,7 @@ import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import pandas as pd
 import yfinance as yf
-
-
-class CliError(RuntimeError):
-    pass
-
 
 WINDOW_DAYS = {
     "1d": 1,
@@ -45,26 +38,26 @@ def warn(message: str) -> None:
 
 
 def load_config(path: Path) -> dict[str, list[str]]:
-    if not path.exists():
-        raise CliError(f"missing config: {path}")
-    try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise CliError(f"invalid JSON config: {path}: {exc}") from exc
-    if not isinstance(raw, dict) or not raw:
-        raise CliError("config must be a non-empty JSON object in shape {\"tag\": [\"TICKER\"]}")
+    assert path.exists(), f"missing config: {path}"
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    assert isinstance(raw, dict) and raw, (
+        'config must be a non-empty JSON object in shape {"tag": ["TICKER"]}'
+    )
     out: dict[str, list[str]] = {}
     for key, value in raw.items():
-        tag = str(key or "").strip()
-        if not tag:
-            raise CliError("config contains a blank tag key")
-        if not isinstance(value, list) or not value:
-            raise CliError(f"config[{tag!r}] must be a non-empty array of tickers")
+        tag = key.strip()
+        assert tag, "config contains a blank tag key"
+        assert tag not in out, f"config contains duplicate tag: {tag!r}"
+        assert isinstance(value, list) and value, (
+            f"config[{tag!r}] must be a non-empty array of tickers"
+        )
         tickers: list[str] = []
         for item in value:
-            ticker = str(item or "").strip()
-            if not ticker:
-                raise CliError(f"config[{tag!r}] contains blank ticker")
+            assert isinstance(item, str), (
+                f"config[{tag!r}] must contain only string tickers"
+            )
+            ticker = item.strip()
+            assert ticker, f"config[{tag!r}] contains blank ticker"
             tickers.append(ticker)
         out[tag] = tickers
     return out
@@ -80,35 +73,32 @@ def fetch_close_series(ticker: str, period: str, interval: str):
             auto_adjust=True,
             threads=False,
         )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - isolate one ticker's fetch failure
         warn(f"{ticker}: fetch failed for period={period} interval={interval}: {exc}")
         return None
     if frame is None or frame.empty:
         warn(f"{ticker}: no data for period={period} interval={interval}")
         return None
-    if "Close" in frame.columns:
-        series = frame["Close"].dropna()
-    elif hasattr(frame.columns, "levels") and "Close" in frame.columns.get_level_values(0):
-        close_frame = frame.xs("Close", axis=1, level=0)
-        if close_frame.empty:
-            warn(f"{ticker}: empty Close frame for period={period} interval={interval}")
-            return None
-        series = close_frame.iloc[:, 0].dropna()
-    else:
+    try:
+        close = frame["Close"]
+    except (KeyError, IndexError, TypeError):
         warn(f"{ticker}: missing Close column for period={period} interval={interval}")
         return None
-    if getattr(series, "ndim", 1) != 1:
-        if getattr(series, "shape", (0, 0))[1] < 1:
-            warn(f"{ticker}: close series frame has no columns for period={period} interval={interval}")
+    if getattr(close, "ndim", 1) != 1:
+        if getattr(close, "shape", (0, 0))[1] < 1:
+            warn(
+                f"{ticker}: close series frame has no columns for period={period} interval={interval}"
+            )
             return None
-        series = series.iloc[:, 0]
+        close = close.iloc[:, 0]
+    series = close.dropna()
     if series.empty:
         warn(f"{ticker}: empty close series for period={period} interval={interval}")
         return None
     try:
         if getattr(series.index, "tz", None) is not None:
             series.index = series.index.tz_convert(None)
-    except Exception:
+    except (AttributeError, TypeError):
         pass
     series = series[~series.index.duplicated(keep="last")].sort_index()
     if len(series) < 2:
@@ -134,7 +124,7 @@ def annualized_volatility(daily_close):
     if returns.empty:
         return None
     vol = float(returns.std()) * math.sqrt(252.0) * 100.0
-    if math.isnan(vol):
+    if not math.isfinite(vol):
         return None
     return vol
 
@@ -157,33 +147,40 @@ def slugify(tag: str) -> str:
 
 
 def write_table_image(rows: list[dict[str, object]], path: Path) -> None:
-    ordered = []
-    for row in sorted(rows, key=lambda item: (str(item["group"]), str(item["ticker"]))):
-        ordered.append(
-            {
-                "group": row["group"],
-                "ticker": row["ticker"],
-                "price": fmt_metric(row["price"]),
-                "pct_1d": fmt_metric(row["pct_1d"]),
-                "pct_1w": fmt_metric(row["pct_1w"]),
-                "pct_4w": fmt_metric(row["pct_4w"]),
-                "pct_12w": fmt_metric(row["pct_12w"]),
-                "pct_52w": fmt_metric(row["pct_52w"]),
-                "vol_ann": fmt_metric(row["vol_ann"]),
-            }
-        )
-    frame = pd.DataFrame(
-        ordered,
-        columns=["group", "ticker", "price", "pct_1d", "pct_1w", "pct_4w", "pct_12w", "pct_52w", "vol_ann"],
-    )
+    columns = [
+        "group",
+        "ticker",
+        "price",
+        "pct_1d",
+        "pct_1w",
+        "pct_4w",
+        "pct_12w",
+        "pct_52w",
+        "vol_ann",
+    ]
     pct_cols = {"pct_1d", "pct_1w", "pct_4w", "pct_12w", "pct_52w"}
-    rows_n = max(len(frame), 1)
+    values = []
+    for row in sorted(rows, key=lambda item: (str(item["group"]), str(item["ticker"]))):
+        values.append(
+            [
+                row["group"],
+                row["ticker"],
+                fmt_metric(row["price"]),
+                fmt_metric(row["pct_1d"]),
+                fmt_metric(row["pct_1w"]),
+                fmt_metric(row["pct_4w"]),
+                fmt_metric(row["pct_12w"]),
+                fmt_metric(row["pct_52w"]),
+                fmt_metric(row["vol_ann"]),
+            ]
+        )
+    rows_n = max(len(values), 1)
     fig_h = max(3.0, min(18.0, 1.1 + rows_n * 0.42))
     fig, ax = plt.subplots(figsize=(14, fig_h))
     ax.axis("off")
     tbl = ax.table(
-        cellText=frame.values,
-        colLabels=frame.columns,
+        cellText=values,
+        colLabels=columns,
         loc="center",
         cellLoc="left",
     )
@@ -197,14 +194,10 @@ def write_table_image(rows: list[dict[str, object]], path: Path) -> None:
             cell.set_text_props(weight="bold")
             cell.set_facecolor("#e9eef5")
             continue
-
-        base = "#f7f9fc" if r % 2 == 0 else "#ffffff"
-        cell.set_facecolor(base)
-
-        col_name = frame.columns[c]
-        if col_name not in pct_cols:
+        cell.set_facecolor("#f7f9fc" if r % 2 == 0 else "#ffffff")
+        if columns[c] not in pct_cols:
             continue
-        text = str(frame.iloc[r - 1, c]).strip()
+        text = str(values[r - 1][c]).strip()
         if not text:
             continue
         try:
@@ -215,24 +208,28 @@ def write_table_image(rows: list[dict[str, object]], path: Path) -> None:
             cell.set_facecolor("#d9f2e6")
         elif value < 0:
             cell.set_facecolor("#f8dddd")
-
-    if len(frame) > 1:
+    if len(values) > 1:
         fig.canvas.draw()
         renderer = fig.canvas.get_renderer()
-        last_col = len(frame.columns) - 1
+        last_col = len(columns) - 1
         inv = ax.transAxes.inverted()
-        for i in range(len(frame) - 1):
-            if str(frame.iloc[i]["group"]) == str(frame.iloc[i + 1]["group"]):
+        for i in range(len(values) - 1):
+            if str(values[i][0]) == str(values[i + 1][0]):
                 continue
-
             # Header is row 0; data starts at row 1.
             next_row = i + 2
             left_bbox = tbl[(next_row, 0)].get_window_extent(renderer)
             right_bbox = tbl[(next_row, last_col)].get_window_extent(renderer)
-
             x0, y = inv.transform((left_bbox.x0, left_bbox.y1))
             x1, _ = inv.transform((right_bbox.x1, right_bbox.y1))
-            ax.plot([x0, x1], [y, y], transform=ax.transAxes, color="#374151", linewidth=2.8, solid_capstyle="butt")
+            ax.plot(
+                [x0, x1],
+                [y, y],
+                transform=ax.transAxes,
+                color="#374151",
+                linewidth=2.8,
+                solid_capstyle="butt",
+            )
     fig.tight_layout()
     fig.savefig(path, dpi=160)
     plt.close(fig)
@@ -243,12 +240,20 @@ def run() -> int:
     subparsers = parser.add_subparsers(dest="subcmd", required=True)
     subparsers.add_parser("run", help="generate normalized multi-horizon market plots")
     parser.parse_args(sys.argv[1:])
-
-    cfg_path = Path.home() / ".botbot" / "meagent-mkt-plot.json"
-    groups = load_config(cfg_path)
+    groups = load_config(Path.home() / ".botbot" / "meagent-mkt-plot.json")
 
     output_dir = Path("/tmp")
     output_dir.mkdir(parents=True, exist_ok=True)
+    output_files: dict[str, Path] = {}
+    tags_by_slug: dict[str, str] = {}
+    for tag in groups:
+        slug = slugify(tag)
+        assert slug != "overview", "tag 'overview' conflicts with overview.png"
+        assert slug not in tags_by_slug, (
+            f"tags {tags_by_slug.get(slug)!r} and {tag!r} have the same output filename"
+        )
+        tags_by_slug[slug] = tag
+        output_files[tag] = output_dir / f"{slug}.png"
 
     metrics_by_ticker: dict[str, dict[str, object]] = {}
     daily_cache: dict[str, object] = {}
@@ -274,8 +279,7 @@ def run() -> int:
                 "vol_ann": annualized_volatility(daily),
             }
 
-    if not metrics_by_ticker:
-        raise CliError("no valid ticker daily data fetched; aborting")
+    assert metrics_by_ticker, "no valid ticker daily data fetched; aborting"
 
     for tag, tickers in groups.items():
         fig, axes = plt.subplots(4, 1, figsize=(14, 16))
@@ -299,13 +303,17 @@ def run() -> int:
                     continue
                 cache_key = (ticker, horizon)
                 if cache_key not in panel_cache:
-                    panel_cache[cache_key] = fetch_close_series(ticker, period=period, interval=interval)
+                    panel_cache[cache_key] = fetch_close_series(
+                        ticker, period=period, interval=interval
+                    )
                 series = panel_cache[cache_key]
                 if series is None:
                     continue
                 start = float(series.iloc[0])
                 if start == 0:
-                    warn(f"{ticker}: skipping {horizon} panel because normalized base is zero")
+                    warn(
+                        f"{ticker}: skipping {horizon} panel because normalized base is zero"
+                    )
                     continue
                 normalized = (series / start) * 100.0
                 legend_value = metrics_by_ticker[ticker][f"pct_{legend_window}"]
@@ -344,7 +352,7 @@ def run() -> int:
 
         fig.suptitle(f"{tag} market comparison", fontsize=15)
         fig.tight_layout(rect=[0, 0, 0.94, 0.98])
-        out_file = output_dir / f"{slugify(tag)}.png"
+        out_file = output_files[tag]
         fig.savefig(out_file, dpi=150)
         image_paths.append(out_file)
         plt.close(fig)
@@ -374,7 +382,7 @@ def run() -> int:
 def main() -> int:
     try:
         return run()
-    except CliError as exc:
+    except AssertionError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
     except KeyboardInterrupt:
