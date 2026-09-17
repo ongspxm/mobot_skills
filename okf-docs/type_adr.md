@@ -15,7 +15,7 @@ This is the decision log. Add new Y-statements at the top, newest first. Keep ea
 In the context of documenting decisions, considering the need for an example, we decided for a short Y-statement against a long template, to achieve fast writing, accepting less detail. #optional_tag
 ```
 
-A Y-statement has six parts: context, concern, chosen option, alternatives considered against it, intended quality, and accepted downside. Use: `In the context of [context], considering [concern], we decided for [option] against [alternatives], to achieve [quality], accepting [downside].`
+A Y-statement has six parts: context, concern, chosen option, alternatives considered against it, intended quality, and accepted downside. Use: `In the context of [context], considering [concern], we decided to [option] instead of [alternatives], so that we can [quality], accepting that [downside].`
 
 ## SCOPE
 
