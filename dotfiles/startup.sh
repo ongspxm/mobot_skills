@@ -9,8 +9,8 @@ if command -v xset >/dev/null 2>&1 && [ -n "${DISPLAY:-}" ]; then
 fi
 
 tmux0() {
-    pwd0=$(realpath .)
-    tmux new-session -As "$(basename "$pwd0")-$(printf %s "$pwd0" | md5sum | cut -c -7)"
+    n="$(basename "$(realpath .)")-$(realpath . | md5sum | cut -c -7)"
+    tmux new-session -As "${n//[.:]/_}"
 }
 
 tuicr() {
