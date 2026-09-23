@@ -15,7 +15,7 @@ function applySwap(swapped) {
 }
 
 export default {
-  apiVersion: 2,
+  apiVersion: 4,
   name: "Panel Swap",
   activate: () => {
     const app = document.querySelector("pi-web-app");

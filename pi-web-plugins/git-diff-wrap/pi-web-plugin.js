@@ -44,7 +44,7 @@ function watch(root) {
 }
 
 export default {
-  apiVersion: 2,
+  apiVersion: 4,
   name: "Git Diff Wrap",
   activate: () => {
     watch(document);
