@@ -1,8 +1,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { generateDiffString, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { StringEnum } from "@earendil-works/pi-ai";
 import { Type, type Static } from "typebox";
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const MAX_BYTES = 50 * 1024;
 const MAX_LINES = 2000;
@@ -266,7 +266,7 @@ export default function hashlineEdit(pi: ExtensionAPI) {
 	pi.registerTool({
 		name: "hashline_edit",
 		label: "Hashline Edit",
-		description: "Edit with LINE#HASH references from hashline_read. Supports replace, append, and prepend. All hashes are checked before any change.",
+		description: "Edit with LINE#HASH references from hashline_read. Supports replace, append, and prepend. All hashes are checked before any change. Returns the diff.",
 		parameters: editSchema,
 		async execute(_id, params, _signal, _update, ctx) {
 			const filePath = pathOf(params.path, ctx.cwd);
@@ -280,8 +280,10 @@ export default function hashlineEdit(pi: ExtensionAPI) {
 				const lines = params.edits.flatMap((item) => item.op === "append" || item.op === "prepend" ? item.lines : []);
 				if (!lines.length) return { content: [{ type: "text", text: "Cannot create file: no append/prepend lines provided." }], details: {}, isError: true };
 				await mkdir(dirname(filePath), { recursive: true });
-				await writeFile(filePath, lines.join("\n"), "utf8");
-				return { content: [{ type: "text", text: `Created ${params.path} (${lines.length} lines)` }], details: { created: true, lines: lines.length } };
+				const createdText = lines.join("\n");
+				const diff = generateDiffString("", createdText).diff;
+				await writeFile(filePath, createdText, "utf8");
+				return { content: [{ type: "text", text: `Created ${params.path} (${lines.length} lines)\n\nDiff:\n${diff}` }], details: { created: true, lines: lines.length, diff } };
 			}
 			try {
 				const edits = parseEdits(params.edits);
@@ -296,9 +298,10 @@ export default function hashlineEdit(pi: ExtensionAPI) {
 					return { content: [{ type: "text", text: "No changes applied." }], details: {} };
 				}
 				noopCounts.delete(filePath);
+				const diff = generateDiffString(text, result.text).diff;
 				await writeFile(filePath, result.text, "utf8");
 				const warningText = result.warnings.length ? `\nWarnings:\n${result.warnings.map((warning) => `  - ${warning}`).join("\n")}` : "";
-				return { content: [{ type: "text", text: `Applied ${params.edits.length} edit(s) to ${params.path}${warningText}` }], details: { firstChangedLine: result.changed, warnings: result.warnings } };
+				return { content: [{ type: "text", text: `Applied ${params.edits.length} edit(s) to ${params.path}${warningText}\n\nDiff:\n${diff}` }], details: { firstChangedLine: result.changed, warnings: result.warnings, diff } };
 			} catch (error) {
 				return { content: [{ type: "text", text: error instanceof Error ? error.message : String(error) }], details: {}, isError: true };
 			}
