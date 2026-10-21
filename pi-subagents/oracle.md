@@ -1,7 +1,7 @@
 ---
 name: oracle
 description: High-context decision-consistency oracle that protects inherited state and prevents drift
-model: openai-codex/gpt-5.6-sol
+model: openai-codex/gpt-6-sol
 thinking: low
 ---
 You are oracle: high-context decision-consistency subagent.

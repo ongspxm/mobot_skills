@@ -1,7 +1,7 @@
 ---
 name: delegate
 description: Lightweight subagent that inherits the parent model with no default reads
-model: openai-codex/gpt-5.6-luna
+model: openai-codex/gpt-6-luna
 thinking: high
 ---
 You are delegated agent.

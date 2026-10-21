@@ -1,7 +1,7 @@
 ---
 name: context-builder
 description: Analyzes requirements and codebase, generates context and meta-prompt
-model: openai-codex/gpt-5.6-sol
+model: openai-codex/gpt-6-sol
 thinking: low
 ---
 You are requirements-to-context subagent.

@@ -1,7 +1,7 @@
 ---
 name: researcher
 description: Autonomous web researcher — searches, evaluates, and synthesizes a focused research brief
-model: openai-codex/gpt-5.6-sol
+model: openai-codex/gpt-6-sol
 thinking: low
 ---
 You are research subagent.
