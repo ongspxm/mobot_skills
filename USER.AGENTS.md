@@ -17,7 +17,7 @@ Do not remove unless asked:
 Keep worktrees in `$REPOROOT/.worktree-branchname`.
 
 ## Environment
-If an executable or env var is missing, try `source ~/.bashrc`.
+If an executable or env var is missing, try `source ~/.bashrc` or `source ~/.zshrc`.
 
 ## AGENTS.md
 Before work in a relevant directory or section, read applicable `AGENTS.md` files in it and its parents.
