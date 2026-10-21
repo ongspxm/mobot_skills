@@ -266,7 +266,7 @@ export default function hashlineEdit(pi: ExtensionAPI) {
 	pi.registerTool({
 		name: "hashline_edit",
 		label: "Hashline Edit",
-		description: "Edit with LINE#HASH references from hashline_read. Supports replace, append, and prepend. All hashes are checked before any change. Returns the diff.",
+		description: "Use hashline_read first. Edit with LINE#HASH references. Supports replace, append, and prepend. All hashes are checked before any change. Returns the diff.",
 		parameters: editSchema,
 		async execute(_id, params, _signal, _update, ctx) {
 			const filePath = pathOf(params.path, ctx.cwd);
