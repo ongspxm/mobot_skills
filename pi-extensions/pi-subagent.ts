@@ -1,12 +1,13 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { Type } from "@sinclair/typebox";
-import { getAgentDir, parseFrontmatter } from "@earendil-works/pi-coding-agent";
+import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
+import { createAgentSession, getAgentDir, parseFrontmatter, SessionManager } from "@earendil-works/pi-coding-agent";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 type Agent = { name: string; description: string; prompt: string; model?: string; thinking?: string };
 
-const DESCRIPTION = "Spawn a role-shaped tracked child session for one focused task. Roles are markdown files; call multiple times in one turn for parallel work.";
+const DESCRIPTION = "Run a role-shaped task in a separate Pi session saved as a child of the calling session. Returns the child session's result.";
 const stringValue = (value: unknown) => typeof value === "string" && value.trim() ? value.trim() : undefined;
 
 function loadAgents(dir: string): Agent[] {
@@ -63,22 +64,33 @@ export default function piSubagent(pi: ExtensionAPI) {
                     const text = `Unknown subagent "${name}". Available in ${ctx.cwd}: ${available.map((item) => item.name).join(", ") || "(none)"}.`;
                     return { content: [{ type: "text" as const, text }], details: { result: null, errorMessage: text }, isError: true };
                 }
-                if (ctx.tools.some((tool) => tool.name === "spawn_subsession")) {
-                    const outcome = await ctx.executeTool("spawn_subsession", {
-                        prompt: `${agent.prompt ? `Role instructions:\n${agent.prompt}\n\n` : ""}Task:\n${task}`,
-                        ...(agent.model ? { model: agent.model } : {}),
-                        ...(agent.thinking ? { thinkingLevel: agent.thinking } : {}),
-                    }, { signal });
+                const slash = agent.model?.indexOf("/") ?? -1;
+                if (agent.model && slash <= 0) throw new Error(`Invalid model: ${agent.model}`);
+                const model = agent.model
+                    ? ctx.modelRegistry.find(agent.model.slice(0, slash), agent.model.slice(slash + 1))
+                    : ctx.model;
+                if (agent.model && !model) throw new Error(`Unknown model: ${agent.model}`);
+                const parentSession = ctx.sessionManager.getSessionFile();
+                const { session } = await createAgentSession({
+                    cwd: ctx.cwd,
+                    model,
+                    ...(agent.thinking ? { thinkingLevel: agent.thinking as ThinkingLevel } : {}),
+                    sessionManager: SessionManager.create(ctx.cwd, undefined, parentSession ? { parentSession } : undefined),
+                });
+                const abort = () => { void session.abort(); };
+                signal.addEventListener("abort", abort, { once: true });
+                if (signal.aborted) abort();
+                try {
+                    await session.prompt(`${agent.prompt ? `Role instructions:\n${agent.prompt}\n\n` : ""}Task:\n${task}`);
+                    const text = session.getLastAssistantText() || "(no output)";
                     return {
-                        content: outcome.result.content,
-                        details: outcome.result.details,
-                        isError: outcome.isError,
+                        content: [{ type: "text" as const, text }],
+                        details: { sessionId: session.sessionId, sessionFile: session.sessionFile, parentSession },
                     };
+                } finally {
+                    signal.removeEventListener("abort", abort);
+                    session.dispose();
                 }
-
-                // TODO: Add a standalone child-process fallback for environments without pi-web.
-                const text = "Cannot spawn subagent: spawn_subsession is not available.";
-                return { content: [{ type: "text" as const, text }], details: { error: text }, isError: true };
             },
         });
         registered = names.join(" ");
@@ -92,6 +104,6 @@ export default function piSubagent(pi: ExtensionAPI) {
     pi.on("session_start", (_event, ctx) => { refresh(ctx.cwd); });
     pi.on("before_agent_start", (event) => {
         const agents = refresh(event.systemPromptOptions.cwd);
-        return { systemPrompt: `${event.systemPrompt}\n\n## Available subagent roles\nRoles load from ~/.pi/agent/agents/ or the nearest project .pi/agents/. Call subagent multiple times in one turn for parallel work.\n${agents.length ? agents.map((agent) => `- ${agent.name}: ${agent.description}`).join("\n") : "(none discovered)"}` };
+        return { systemPrompt: `${event.systemPrompt}\n\n## Available subagent roles\nRoles load from ~/.pi/agent/agents/ or the nearest project .pi/agents/. Each subagent runs in a separate Pi session linked to the session that called it.\n${agents.length ? agents.map((agent) => `- ${agent.name}: ${agent.description}`).join("\n") : "(none discovered)"}` };
     });
 }
