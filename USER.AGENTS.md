@@ -1,6 +1,6 @@
 ## Inline annotations
 - Each `%%` line is a direct user instruction, only remove when asked and confirmed done.
-- read surrounding lines for context, clarify if needed.
+- comments may span multiline. read surrounding lines for context, clarify if needed
 
 ## Comment prefixes
 Do not remove unless asked:
@@ -9,7 +9,7 @@ Do not remove unless asked:
 
 ## git commit
 - keep msges compact and self-explanatory.
-- Format: `type: (component) description`
+- Format: `type: component. description`
 - Types: `feat`, `fix`, `chore`, `docs`.
 - Split commits by cohesive concern. Stage only the files or hunks that belong to each commit; avoid one-file-per-commit when files share a concern.
 
