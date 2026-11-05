@@ -16,9 +16,10 @@ if ! git worktree list --porcelain | grep -qx 'branch refs/heads/public'; then
 fi
 cd "$root/.worktree-public"
 before=$(git rev-parse HEAD)
-git read-tree --reset -u main   # stages main tree into index
-git reset                       # unstage: index back to HEAD, worktree keeps main tree
-git diff --stat                 # now plain diff shows all changes vs public
+git read-tree --reset -u main                   # stages main tree into index
+git reset                                       # unstage: index back to HEAD, worktree keeps main tree
+[[ -e pushpublic.sh ]] && bash pushpublic.sh    # run any additional scripts and rules
+git diff --stat                                 # now plain diff shows all changes vs public
 git diff
 # read full diff, then group+commit (below); push when done
 git push origin public
