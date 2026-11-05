@@ -9,6 +9,7 @@ description: Use when you need an I Ching hexagram lookup from three numbers.
 
 - Always run the script with exactly 3 integer arguments.
 - Always run with `raw_output=true`.
+- Write the interpretation in Traditional Chinese (繁體中文), not Simplified Chinese.
 
 ```bash
 uv run <path-to-skill>/script.py N0 N1 N2

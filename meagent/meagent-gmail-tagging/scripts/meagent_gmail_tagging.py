@@ -310,27 +310,36 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 def cmd_print(args: argparse.Namespace) -> int:
     gmail_cmd = _gmail_base_cmd()
-
-    untagged_query = "in:INBOX AND NOT label:6.auto AND NOT label:autofin AND NOT (label:0.action OR label:3.reading OR label:4.junk)"
-    untagged_lines = [ln for ln in _run_stdout(gmail_cmd + ["ls", untagged_query]).splitlines() if ln.strip()]
+    query = "in:INBOX AND NOT label:6.auto AND NOT label:autofin"
+    lines = [ln for ln in _run_stdout(gmail_cmd + ["ls", query]).splitlines() if ln.strip()]
     untagged_rows: list[dict[str, Any]] = []
-    for line in untagged_lines:
+    grouped: dict[str, list[dict[str, Any]]] = {tag: [] for tag in TAG_PRIORITY}
+    for line in lines:
         try:
             item = json.loads(line)
         except json.JSONDecodeError as exc:
             raise CliError("botbot-gmail ls returned non-NDJSON output") from exc
-        untagged_rows.append(
-            {
-                "idx": len(untagged_rows),
-                "subject": _clean_text(str(item.get("subject", ""))),
-                "from": _clean_text(str(item.get("from", ""))),
-                "tstamp": _parse_tstamp_ms(item.get("tstamp")),
-            }
+        labels = item.get("labels")
+        normalized_labels = {str(x).strip().lower() for x in labels} if isinstance(labels, list) else set()
+        tag = next(
+            (candidate for candidate in TAG_PRIORITY if GMAIL_LABELS[candidate].lower() in normalized_labels),
+            "",
         )
+        row = {
+            "idx": len(grouped[tag]) if tag else len(untagged_rows),
+            "subject": _clean_text(str(item.get("subject", ""))),
+            "from": _clean_text(str(item.get("from", ""))),
+            "tstamp": _parse_tstamp_ms(item.get("tstamp")),
+        }
+        if tag:
+            row["tag"] = tag
+            grouped[tag].append(row)
+        else:
+            untagged_rows.append(row)
 
-    print(f"=== untagged ({len(untagged_rows)}) ===")
     now_ms = int(time.time() * 1000)
-    for row in sorted(untagged_rows, key=lambda r: int(r.get("idx", -1))):
+    print(f"=== untagged ({len(untagged_rows)}) ===")
+    for row in untagged_rows:
         ts = _parse_tstamp_ms(row.get("tstamp"))
         if ts <= 0:
             age = "0D"
@@ -340,39 +349,8 @@ def cmd_print(args: argparse.Namespace) -> int:
         print(f"{row.get('idx')}. {age}. {row.get('subject', '')} ({row.get('from', '')})")
     print("")
 
-    tagged_query = "in:INBOX AND NOT label:autofin (label:0.action OR label:3.reading OR label:4.junk)"
-    tagged_lines = [ln for ln in _run_stdout(gmail_cmd + ["ls", tagged_query]).splitlines() if ln.strip()]
-    tagged_rows: list[dict[str, Any]] = []
-    for line in tagged_lines:
-        try:
-            item = json.loads(line)
-        except json.JSONDecodeError as exc:
-            raise CliError("botbot-gmail ls returned non-NDJSON output") from exc
-        labels = item.get("labels")
-        normalized_labels = {str(x).strip().lower() for x in labels} if isinstance(labels, list) else set()
-        tag = ""
-        for candidate in TAG_PRIORITY:
-            if GMAIL_LABELS[candidate].lower() in normalized_labels:
-                tag = candidate
-                break
-        if not tag:
-            continue
-        tagged_rows.append(
-            {
-                "idx": len(tagged_rows),
-                "subject": _clean_text(str(item.get("subject", ""))),
-                "from": _clean_text(str(item.get("from", ""))),
-                "tag": tag,
-                "tstamp": _parse_tstamp_ms(item.get("tstamp")),
-            }
-        )
-
-    grouped: dict[str, list[dict[str, Any]]] = {tag: [] for tag in TAG_PRIORITY}
-    for row in tagged_rows:
-        grouped[str(row.get("tag", ""))].append(row)
-
     for tag in TAG_PRIORITY:
-        items = sorted(grouped[tag], key=lambda r: int(r.get("idx", -1)))
+        items = grouped[tag]
         print(f"=== {tag} ({len(items)}) ===")
         for row in items:
             ts = _parse_tstamp_ms(row.get("tstamp"))
