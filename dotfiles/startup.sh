@@ -42,3 +42,6 @@ gwtadd() {
         git worktree add "$githome/.worktree-$gitpath" "$gitbranch"
     fi
 }
+gwtdel() {
+    git worktree remove "$(pwd)"
+}

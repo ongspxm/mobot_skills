@@ -1,0 +1,134 @@
+" Colorscheme
+colorscheme darkblue
+syntax on
+set cc=80,100,120
+
+" Keep packages outside the dotfiles symlink
+set packpath+=~/.local/share/vim
+
+" scratch command
+command! Scratch new | setlocal buftype=nofile bufhidden=hide noswapfile nobuflisted
+
+" fugitive chdir to git root
+command! GitCd execute 'cd ' . fnameescape(FugitiveGitDir()) | cd .. | pwd
+
+" Spaces & Tabs
+set tabstop=4 shiftwidth=4 softtabstop=4 expandtab
+set autoindent
+retab
+
+" Wrapping
+set wrap
+set linebreak
+set nolist
+
+" UI Config
+set number cursorline
+set wildmenu
+set nolazyredraw
+set showmatch
+
+" Searching
+set incsearch hlsearch
+nnoremap <leader><space> :set hls!<CR>
+
+" Folding
+set foldenable
+set foldlevelstart=10
+set foldmethod=indent
+
+" Movement
+nnoremap j gj
+nnoremap k gk
+nnoremap <down> gj
+nnoremap <up> gk
+inoremap jk <Esc>
+
+" Save session
+nnoremap <F2> :mksession! ./.vim-session<CR>
+nnoremap <F3> :source ./.vim-session<CR>
+
+" clear screen for redrawing issues
+nnoremap <F5> :!clear<CR>
+
+" Remove trailing spaces
+nnoremap <leader>ss :%s/\s\+$//e<CR>
+nnoremap <leader>st :e ~/stash<CR>
+
+filetype plugin indent on
+
+" makefile oni use tab, dun use space
+autocmd FileType make set noexpandtab shiftwidth=8 softtabstop=0
+
+" nerd tree toggl
+let g:NERDTreeWinSize = 50
+nnoremap <C-n> :NERDTreeToggle<CR>
+nnoremap <C-y> :CtrlP<CR>
+
+set hidden
+imap ,t <Esc>:tabnew<CR>
+nnoremap <C-k> :bnext<CR>
+nnoremap <C-j> :bprevious<CR>
+nnoremap <C-i> :bp <BAR> bd #<CR>
+
+" vim-signify
+set updatetime=100
+
+" allow copy paste to clipboard
+vnoremap <C-C> :w !xclip -i -sel c<CR><CR>
+
+" ALE stuff
+nmap <Leader>al= :ALEFix<CR>
+nmap <Leader>alss :ALESymbolSearch<SPACE>
+
+nmap <silent> gd :ALEGoToDefinition<CR>
+nmap <silent> <Leader>alfu :ALEFindReferences<CR>
+nmap <silent> <Leader>algcc :ALEPopulateQuickfix<CR>
+nmap <silent> <Leader>alca :ALECodeAction<CR>
+nmap <silent> <Leader>alnm :ALERename<CR>
+nmap <silent> <Leader>alim :ALEImport<CR>
+
+nmap <silent> <C-h> :ALEPreviousWrap<CR>
+nmap <silent> <C-l> :ALENextWrap<CR>
+
+let g:ale_completion_enabled = 1
+let g:ale_linters = {
+\   'python': ['pyright', 'pylint'],
+\   'cs': ['OmniSharp'] }
+let g:ale_fixers = {
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\   'python': ['autoimport', 'isort', 'yapf'],
+\   'rust': ['rustfmt']}
+
+" statusline
+let g:lightline = {
+\ 'active': {
+\   'left': [ [ 'mode', 'paste' ],
+\             [ 'readonly', 'filename', 'modified', 'codeium' ] ],
+\   'right': [
+\     ['linter_checking', 'linter_errors', 'linter_warnings', 'linter_infos', 'linter_ok'],
+\     ['lineinfo'], ['percent'],
+\     ['fileformat', 'fileencoding', 'filetype', 'sharpenup']
+\   ]
+\ },
+\ 'inactive': {
+\   'right': [['lineinfo'], ['percent']]
+\ },
+\ 'component_function': {
+\   'codeium': 'codeium#GetStatusString'
+\ },
+\ 'component_expand': {
+\   'linter_checking': 'lightline#ale#checking',
+\   'linter_infos': 'lightline#ale#infos',
+\   'linter_warnings': 'lightline#ale#warnings',
+\   'linter_errors': 'lightline#ale#errors',
+\   'linter_ok': 'lightline#ale#ok'
+\  },
+\ 'component_type': {
+\   'linter_checking': 'right',
+\   'linter_infos': 'right',
+\   'linter_warnings': 'warning',
+\   'linter_errors': 'error',
+\   'linter_ok': 'right'
+\  }
+\}
