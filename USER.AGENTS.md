@@ -1,3 +1,5 @@
+IMPORTANT: always keep your replies brief, short and concise. Keep all technical details
+
 ## Inline annotations
 - Each `%%` line is a direct user instruction, only remove when asked and confirmed done.
 - comments may span multiline. read surrounding lines for context, clarify if needed
@@ -12,9 +14,11 @@ Do not remove unless asked:
 - Format: `type: component. description`
 - Types: `feat`, `fix`, `chore`, `docs`.
 - Split commits by cohesive concern. Stage only the files or hunks that belong to each commit; avoid one-file-per-commit when files share a concern.
+- NEVER commit without an explicit OK
 
 ## Git worktrees
 Keep worktrees in `$REPOROOT/.worktree-branchname`.
+ALWAYS edit and run cmds from the worktree that you are in, never in other worktrees
 
 ## Environment
 If an executable or env var is missing, try `source ~/.bashrc` or `source ~/.zshrc`.
