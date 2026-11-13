@@ -7,7 +7,12 @@ description: Publish main's tree on public as clean commits, without main histor
 
 ## Workflows
 ```bash
-git fetch --all --prune
+if ! git remote get-url public >/dev/null 2>&1; then
+  echo "Error: Git remote 'public' is not configured; add it before publishing." >&2
+  exit 1
+fi
+git fetch public main
+git fetch origin main --prune
 orig_ref=$(git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
 git checkout main && git pull --ff-only origin main && git checkout "$orig_ref"
 root=$(git rev-parse --show-toplevel)
@@ -22,7 +27,7 @@ git reset                                       # unstage: index back to HEAD, w
 git diff --stat                                 # now plain diff shows all changes vs public
 git diff
 # read full diff, then group+commit (below); push when done
-git push origin public
+git push public public:main
 git log --oneline "$before..HEAD" # commits created
 ```
 
