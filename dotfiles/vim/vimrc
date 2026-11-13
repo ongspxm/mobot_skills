@@ -93,12 +93,15 @@ nmap <silent> <C-l> :ALENextWrap<CR>
 
 let g:ale_completion_enabled = 1
 let g:ale_linters = {
+\   'go': ['gopls'],
 \   'python': ['pyright', 'pylint'],
 \   'cs': ['OmniSharp'] }
 let g:ale_fixers = {
 \   '*': ['remove_trailing_lines', 'trim_whitespace'],
 \   'python': ['autoimport', 'isort', 'yapf'],
-\   'rust': ['rustfmt']}
+\   'rust': ['rustfmt'],
+\   'go': ['gofmt', 'goimports']}
+let g:ale_fix_on_save = 1
 
 " statusline
 let g:lightline = {

@@ -8,13 +8,14 @@ plugin_urls=(
     https://github.com/ctrlpvim/ctrlp.vim.git
     https://github.com/editorconfig/editorconfig-vim.git
     https://github.com/preservim/nerdtree
-    https://github.com/ziglang/zig.vim.git
-    https://github.com/Exafunction/codeium.vim.git
+
     https://github.com/ap/vim-buftabline.git
     https://github.com/itchyny/lightline.vim
     https://github.com/maximbaz/lightline-ale.git
     https://tpope.io/vim/fugitive.git
     https://github.com/mhinz/vim-signify.git
+
+    https://github.com/ziglang/zig.vim.git
 )
 
 mkdir -p "$plugins_dir"

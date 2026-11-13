@@ -10,7 +10,7 @@ fi
 
 tmux0() {
     n="$(basename "$(realpath .)")-$(realpath . | md5sum | cut -c -7)"
-    tmux new-session -As "${n//[.:]/_}"
+    tmux -u new-session -As "${n//[.:]/_}"
 }
 
 tuicr() {
