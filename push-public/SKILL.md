@@ -27,7 +27,7 @@ git log --oneline "$before..HEAD" # commits created
 ```
 
 ## When to Use
-`public` gets `main`'s files. Its commits stay separate. Use `.worktree-public`; keep it for later syncs. Never create another `public` checkout. if public branch doesnt exist, create a bare commit
+`public` gets `main`'s files. Its commits stay separate. Use `.worktree-public`; keep it for later syncs. Never create another `public` checkout.
 
 `read-tree --reset -u main` replaces tracked files and index with `main` while `HEAD` remains `public`.
 
