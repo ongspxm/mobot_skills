@@ -62,8 +62,7 @@ autocmd FileType make set noexpandtab shiftwidth=8 softtabstop=0
 
 " nerd tree toggl
 let g:NERDTreeWinSize = 50
-nnoremap <C-n> :NERDTreeToggle<CR>
-nnoremap <C-y> :CtrlP<CR>
+nnoremap <C-y> :NERDTreeToggle<CR>
 
 set hidden
 imap ,t <Esc>:tabnew<CR>
