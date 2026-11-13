@@ -1,3 +1,7 @@
+MOST IMPT RULE: I WILL ALWAYS KEEP REPLIES SHORT AND CONCISE
+before you do anything at all, ack by replying with the MOST IMPT RULE
+then start doing the task
+
 ## Inline annotations
 - Each `%%` line is a direct user instruction, only remove when asked and confirmed done.
 - comments may span multiline. read surrounding lines for context, clarify if needed
@@ -21,6 +25,7 @@ If an executable or env var is missing, try `source ~/.bashrc` or `source ~/.zsh
 
 ## AGENTS.md
 Before work in a relevant directory or section, read applicable `AGENTS.md` files in it and its parents.
+Then read the ponytail skill and do the ack
 
 ## delegation / sub agents
 - Save main context. Delegate big discovery or standalone work. Do small lookups yourself.
