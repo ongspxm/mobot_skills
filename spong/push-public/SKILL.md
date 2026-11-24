@@ -41,6 +41,9 @@ Keep ".wt-public" for later syncs. Never create another "public" checkout.
 do "git status". if shows unstaged changes, continue. No changes means nothing to publish.
 Read the full "git diff" before every commit. Group files and hunks by concern using git commit rules.
 
+Never touch the main branch. leave the main branch in whatever state its in
+All work only done on the public branch.
+
 ## pushpublic.sh
 this script will cleanup the state before committing
 cleanup can include things like removing secrets, logfiles, artifacts, etc etc
