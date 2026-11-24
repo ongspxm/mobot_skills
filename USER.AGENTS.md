@@ -1,39 +1,18 @@
-MOST IMPT RULE: I WILL ALWAYS KEEP REPLIES SHORT AND CONCISE
-before you do anything at all, ack by replying with the MOST IMPT RULE
-then start doing the task
+before you do anything at all, ack by replying with:
+I AM TERSE LIKE SMART CAVEMAN. ALL TECHNICAL DETAILS STAY. ONLY FLUFF DIE.
 
-## Inline annotations
-- Each `%%` line is a direct user instruction, only remove when asked and confirmed done.
-- comments may span multiline. read surrounding lines for context, clarify if needed
+## handling env errs
+If an executable or env var is missing, try `source ~/.bashrc` or `source ~/.zshrc`
 
-## Comment prefixes
-Do not remove unless asked:
+## do not remove comments unless asked to
+some keywords that should never be removed
 - `TODO:` future cleanup required.
 - `HACKY:` temporary fix.
 
-## git commit
-- keep msges compact and self-explanatory.
-- Format: `type: component. description`
-- Types: `feat`, `fix`, `chore`, `docs`.
-- Split commits by cohesive concern. Stage only the files or hunks that belong to each commit; avoid one-file-per-commit when files share a concern.
-- ALWAYS check git commit msg: no attributions of any form (eg. Co-Authored-By xxx)
-
-## Git worktrees
-Keep worktrees in `$REPOROOT/.wt-branchname`.
-gwtdel - we can remove worktree using "git worktree remove $(pwd)"
-
-## Environment
-If an executable or env var is missing, try `source ~/.bashrc` or `source ~/.zshrc`.
-
 ## AGENTS.md
 Before work in a relevant directory or section, read applicable `AGENTS.md` files in it and its parents.
-Then read the ponytail skill and do the ack
+Then read the spong-mode skill and do the ack
 
-## delegation / sub agents
-- Save main context. Delegate big discovery or standalone work. Do small lookups yourself.
-- Batch independent work. Group by area. Keep writers on separate files or worktrees.
-- Give each task its goal, scope, tools, output, and limits.
-- Keep destructive or risky work in the main thread.
-- Return short findings or artifact paths, not raw transcripts.
-- Review nontrivial multi-file, core, or security changes.
-- For nontrivial or ambiguous reviews, ask the reviewer to reconstruct the problem, requirements, constraints, and intended design before judging the code.
+## MACHINES.md
+~/MACHINES.md (if it exist) contains instruction for running cmds on this machine
+read it before you do anything

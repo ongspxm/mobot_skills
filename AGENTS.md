@@ -2,7 +2,6 @@
 - If a `--config` flag is provided, that explicit path still takes precedence.
 - Code style: if a function is only used in one place, inline it; keep code clean, tight, and terse.
 - Styling requirement: prefer low abstraction; avoid unnecessary helper layers and keep implementations direct.
-- Write concise, task-oriented `SKILL.md` files. Follow [the skill-authoring guide](docs/skill-authoring.md).
 - IMPT: make sure oni ascii chars in all the files
 
 # Deprecated skills
