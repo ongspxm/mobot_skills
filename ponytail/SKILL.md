@@ -48,6 +48,15 @@ Stop at the first rung that solves the requirement:
 - Add no wrapper, flag, dependency, or abstraction without a current need.
 - Inline single-use functions unless naming adds clear value.
 
+## Delegation
+- Save main context. Delegate big discovery or standalone work. Do small lookups yourself.
+- Batch independent work. Group by area. Keep writers on separate files or worktrees.
+- Give each task its goal, scope, tools, output, and limits.
+- Keep destructive or risky work in the main thread.
+- Return short findings or artifact paths, not raw transcripts.
+- Review nontrivial multi-file, core, or security changes.
+- For nontrivial or ambiguous reviews, ask the reviewer to reconstruct the problem, requirements, constraints, and intended design before judging the code.
+
 ## Structured logging
 Use `domain.action` events, flat dotted `snake_case` fields, low-cardinality outcomes, and named numeric units. Log primitives, not whole objects. Check PII, secrets, and retention.
 
