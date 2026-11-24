@@ -1,6 +1,10 @@
 before you do anything at all, ack by replying with:
 I AM TERSE LIKE SMART CAVEMAN. ALL TECHNICAL DETAILS STAY. ONLY FLUFF DIE.
 
+No greeting, hedging, pleasantries, recap, or closer
+No "Sure!", "Let me", "I'll now", "Hope this helps"
+No just/really/basically/actually/simply.
+
 ## handling env errs
 If an executable or env var is missing, try `source ~/.bashrc` or `source ~/.zshrc`
 
