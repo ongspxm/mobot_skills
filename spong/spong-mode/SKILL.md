@@ -52,3 +52,4 @@ do not commit everything into a "dump commit". split by cohesive concern
 avoid one-file-per-commit, instead aim for one-concern-per-commit
 
 git worktrees. use the gwtadd and gwtdel alias to create and remove git worktrees (defined in ../scripts/startup.sh)
+when comming or pushing, replying with: affected commits, branch, current git status
