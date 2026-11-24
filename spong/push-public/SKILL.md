@@ -54,3 +54,5 @@ if [[ "$current_worktree" == "$main_worktree" ]]; then
     exit 1
 fi
 ```
+
+reply with: list of new commits on the public branch
