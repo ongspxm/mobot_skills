@@ -17,13 +17,13 @@ orig_ref=$(git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
 git checkout main && git pull --ff-only origin main && git checkout "$orig_ref"
 root=$(git rev-parse --show-toplevel)
 if ! git worktree list --porcelain | grep -qx 'branch refs/heads/public'; then
-  git -C "$root" worktree add .worktree-public public
+  git -C "$root" worktree add .wt-public public
 fi
-cd "$root/.worktree-public"
+cd "$root/.wt-public"
 before=$(git rev-parse HEAD)
 git read-tree --reset -u main                   # stages main tree into index
 git reset                                       # unstage: index back to HEAD, worktree keeps main tree
-[[ -e pushpublic.sh ]] && bash pushpublic.sh    # run any additional scripts and rules (only in public)
+[[ -e pushpublic.sh ]] && bash pushpublic.sh    # run any additional scripts and rules (only in public branch, NOT IN MAIN)
 git diff --stat                                 # now plain diff shows all changes vs public
 git diff
 # read full diff, then group+commit (below); push when done
@@ -32,7 +32,7 @@ git log --oneline "$before..HEAD" # commits created
 ```
 
 ## When to Use
-`public` gets `main`'s files. Its commits stay separate. Use `.worktree-public`; keep it for later syncs. Never create another `public` checkout.
+`public` gets `main`'s files. Its commits stay separate. Use `.wt-public`; keep it for later syncs. Never create another `public` checkout.
 
 `read-tree --reset -u main` replaces tracked files and index with `main` while `HEAD` remains `public`.
 

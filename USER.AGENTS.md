@@ -16,9 +16,11 @@ Do not remove unless asked:
 - Format: `type: component. description`
 - Types: `feat`, `fix`, `chore`, `docs`.
 - Split commits by cohesive concern. Stage only the files or hunks that belong to each commit; avoid one-file-per-commit when files share a concern.
+- ALWAYS check git commit msg: no attributions of any form (eg. Co-Authored-By xxx)
 
 ## Git worktrees
-Keep worktrees in `$REPOROOT/.worktree-branchname`.
+Keep worktrees in `$REPOROOT/.wt-branchname`.
+gwtdel - we can remove worktree using "git worktree remove $(pwd)"
 
 ## Environment
 If an executable or env var is missing, try `source ~/.bashrc` or `source ~/.zshrc`.
