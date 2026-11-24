@@ -1,15 +1,30 @@
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: check-json
-      - id: pretty-format-json
-        args: [--autofix]
-      - id: check-yaml
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.11.0.1
-    hooks:
-      - id: shellcheck
-        args: [--exclude=SC1091]
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  - id: check-json
+  - id: pretty-format-json
+    args: [--autofix]
+  - id: check-yaml
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v2.15.0
+  hooks:
+  - id: pretty-format-yaml
+    args: [--autofix]
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.12.12
+  hooks:
+  - id: ruff-check
+    args: [--fix]
+  - id: ruff-format
+- repo: https://github.com/shellcheck-py/shellcheck-py
+  rev: v0.11.0.1
+  hooks:
+  - id: shellcheck
+    args:
+    - --exclude=SC1091
+    - --exclude=SC2088
+    - --exclude=SC2086
+    - --exclude=SC2162

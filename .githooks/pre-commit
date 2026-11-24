@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+command -v pre-commit >/dev/null || {
+  printf 'pre-commit is required; install it before committing\n' >&2
+  exit 1
+}
+
+exec pre-commit run --hook-stage pre-commit --color=always

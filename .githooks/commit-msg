@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+message_file=$1
+clean_file=$(mktemp)
+trap 'rm -f "$clean_file"' EXIT
+
+git stripspace --strip-comments < "$message_file" > "$clean_file"
+
+awk '
+function is_trailer(line) {
+  return line ~ /^[[:alnum:]][[:alnum:]_-]*:[[:space:]]*/
+}
+{
+  line[NR] = $0
+  n = NR
+}
+END {
+  end = n
+  start = end
+  while (start >= 1 && is_trailer(line[start])) {
+    start--
+  }
+
+  if (start == end) {
+    for (i = 1; i <= n; i++) {
+      print line[i]
+    }
+  } else if (start >= 1 && start < end && line[start] == "") {
+    for (i = 1; i < start; i++) {
+      print line[i]
+    }
+  } else {
+    for (i = 1; i <= n; i++) {
+      print line[i]
+    }
+  }
+}
+' "$clean_file" > "$message_file"

@@ -1,4 +1,6 @@
 __pycache__/
 .*
 !.pre-commit-config.yaml
+!.githooks/
+!.githooks/**
 *.pyc
