@@ -37,9 +37,9 @@ gwtadd() {
     githome=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
     gitpath=$(echo "$gitbranch" | tr -cd '[:alnum:]' | tr '[:upper:]' '[:lower:]')
     if [ -n "$1" ] && ! git show-ref --verify --quiet "refs/heads/$gitbranch"; then
-        git worktree add -b "$gitbranch" "$githome/.worktree-$gitpath" HEAD
+        git worktree add -b "$gitbranch" "$githome/.wt-$gitpath" HEAD
     else
-        git worktree add "$githome/.worktree-$gitpath" "$gitbranch"
+        git worktree add "$githome/.wt-$gitpath" "$gitbranch"
     fi
 }
 gwtdel() {
