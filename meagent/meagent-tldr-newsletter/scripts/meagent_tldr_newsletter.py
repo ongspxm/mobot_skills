@@ -152,6 +152,46 @@ def _parse_aisecret(body: str) -> list[tuple[str, str, str]]:
             desc = next((candidate for candidate in reversed(candidates[:link_index]) if candidate), "")
         if "What's happening:" not in desc:
             items.append((title, desc, candidates[link_index].strip("()")))
+    subject = next((line for line in lines if line), "")
+    headline = next(
+        (
+            (index, match.group(1).strip(), match.group(2))
+            for index, line in enumerate(lines)
+            if (match := re.fullmatch(r"(.+?)\s+\((https?://[^)\s]+)\)", line))
+            and WS_RE.sub(" ", match.group(1).strip()).casefold()
+            == WS_RE.sub(" ", subject).casefold()
+        ),
+        None,
+    )
+    if headline:
+        headline_index, title, link = headline
+        story_title_index = next(
+            (index for index in range(headline_index + 1, len(lines)) if lines[index] == title),
+            -1,
+        )
+        if story_title_index >= 0:
+            candidates = lines[story_title_index + 1 :]
+        else:
+            greeting_index = next(
+                (index for index, line in enumerate(lines) if line.lower().startswith("good morning")),
+                -1,
+            )
+            candidates = lines[greeting_index + 1 :] if greeting_index >= 0 else lines[1:]
+        desc = next(
+            (
+                line
+                for line in candidates
+                if line
+                and not line.lower().startswith(("photo:", "by ", "view in browser", "read online"))
+                and not URL_RE.fullmatch(line.strip("()"))
+                and len(line) >= 20
+            ),
+            "",
+        )
+        desc = re.sub(r"\s*\(https?://[^)\s]+\)", "", desc)
+        desc = WS_RE.sub(" ", re.sub(URL_RE, "", desc)).strip()
+        if desc and not any(item[2] == link for item in items):
+            items.append((title, desc, link))
     return items
 
 
