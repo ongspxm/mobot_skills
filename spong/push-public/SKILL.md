@@ -36,18 +36,16 @@ git push public public:main
 git log --oneline "$before..HEAD"
 ```
 
-Keep ".wt-public" for later syncs. Never create another "public" checkout.
-"git read-tree --reset -u main" replaces the tracked tree and index with "main"; "HEAD" stays "public".
-do "git status". if shows unstaged changes, continue. No changes means nothing to publish.
-Read the full "git diff" before every commit. Group files and hunks by concern using git commit rules.
+Keep .wt-public for later syncs; never create another public checkout.
+"git read-tree --reset -u main" replaces tracked tree and index with main; HEAD stays public.
+Run "git status". Unstaged changes -> continue; clean tree -> nothing to publish.
+Read full "git diff" before every commit. Group files and hunks by concern (spong-mode skill git rules).
 
-Never touch the main branch. leave the main branch in whatever state its in
-All work only done on the public branch.
+Never touch main branch; leave it as-is. All work stays on public branch.
 
 ## pushpublic.sh
-this script will cleanup the state before committing
-cleanup can include things like removing secrets, logfiles, artifacts, etc etc
-check that pushpublic.sh start with this guard, put it at the top of the file. add it if missing.
+Cleanup script run before committing (strip secrets, logfiles, artifacts).
+Ensure pushpublic.sh starts with this guard; add at top if missing:
 
 ```
 main_worktree=$(git worktree list --porcelain | sed -n '1s/^worktree //p')
@@ -58,4 +56,4 @@ if [[ "$current_worktree" == "$main_worktree" ]]; then
 fi
 ```
 
-reply with: list of new commits on the public branch
+Reply with: list of new commits on public branch.
