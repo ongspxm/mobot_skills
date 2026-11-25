@@ -28,3 +28,10 @@ repos:
     - --exclude=SC2088
     - --exclude=SC2086
     - --exclude=SC2162
+- repo: local
+  hooks:
+  - id: review-checks
+    name: review checks
+    entry: .githooks/check-review.py
+    language: script
+    always_run: true
