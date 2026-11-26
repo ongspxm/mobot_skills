@@ -18,15 +18,15 @@
 - each skill should represent one task, and the task name should be the skill name.
 
 # user AGENTS.md
-USER.AGENTS.md is meant to be saved at the user's home directory, and loaded in all repos and subdirs
+USER.AGENTS.md is linked to ~/AGENTS.md (and agent dirs) via dotfiles/setup.sh, and loaded in all repos and subdirs.
 
 # pi settings
-pi.settings.json should be appended to ~/.pi/agents/settings.json as some sanes defaults
+pi.settings.json should be appended to ~/.pi/agent/settings.json as sane defaults.
+pi-extensions/ is linked to ~/.pi/agent/extensions via dotfiles/setup.sh.
 
-# pi-subagents
-subagents definition sit here. this is in alignemnt to https://github.com/ongspxm/pi-subagent
-should be linked to ~/.pi/agent/agents
+# spong
+spong/ holds core workflow, principle, and repo setup skills; dotfiles/setup.sh links them into ~/.agents/skills and agent dirs.
+setup-spong at repo root symlinks spong/setup-spong/ for skill discovery.
 
-# pi-web plugins
-ui plugins for piweb.dev
-should be linked to ~/.pi-web/plugins
+# hooks
+run ./dotfiles/setup.sh (or ./scripts/setup-githooks.sh) to configure core.hooksPath=.githooks and pre-commit checks.
