@@ -62,6 +62,9 @@ aifiles "$HOME/.prime/agent"
 aifiles "$HOME/.config/opencode"
 aifiles "$HOME/.copilot"
 
+ln -sfn "$DIRNAME/../pi-extensions" "$HOME/.pi/agent/extensions"
+bash "$DIRNAME/../scripts/setup-githooks.sh"
+
 grep -Fqx "source \$HOME/startup.sh" ~/.bashrc || echo "source \$HOME/startup.sh" >> ~/.bashrc
 
 ln -sfn "$HOME/.vim/vimrc" "$HOME/.vimrc"

@@ -19,8 +19,8 @@ keywords that you should never touch:
 - `TODO:` future cleanup required.
 - `HACKY:` temporary fix.
 
-## AGENTS.md
-before work, look at curr dir and parents, read all "AGENTS.md"
+## AGENTS + README
+before work, look at curr dir and parents, read all AGENTS.md and README.md
 then read spong-mode skill and ack
 
 ## MACHINE.md

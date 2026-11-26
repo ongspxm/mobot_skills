@@ -2,7 +2,9 @@
 
 ## Setup
 
-- Git hooks: run `./scripts/setup-githooks.sh` once after clone.
-- Dotfiles: from `dotfiles/`, run `./setup.sh` once. It symlinks files into `~` and loads `~/startup.sh` via `~/.bashrc`.
-- PI extensions: `mkdir -p ~/.pi/agent && ln -sfn "$PWD/pi-extensions" ~/.pi/agent/extensions`
-- Pi subagents: `mkdir -p ~/.pi/agent && ln -sfn "$PWD/pi-subagents" ~/.pi/agent/agents`
+Run "./dotfiles/setup.sh" once after clone. It sets up:
+
+- Dotfiles in "~" and loads "~/startup.sh" from "~/.bashrc"
+- "USER.AGENTS.md" and "spong/" skills across agent directories
+- PI extensions in "~/.pi/agent/extensions"
+- Repo git hooks via "scripts/setup-githooks.sh"
