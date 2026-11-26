@@ -66,5 +66,5 @@ Each entry names when it applies.
 
 Commit messages: "(feat|fix|chore|docs): component. description".
 Split by cohesive concern; no dump commits and no one-file-per-commit.
-Worktrees: use gwtadd and gwtdel (in scripts/startup.sh).
+Worktrees: use gwtadd and gwtdel (in scripts/startup.sh). gwtdel deletes branch by default (-D after cherry-pick/squash, -k to keep).
 On commit or push, reply with: affected commits, branch, current git status.
