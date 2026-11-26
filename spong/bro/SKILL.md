@@ -13,3 +13,4 @@ Restate last message in smart caveman style. Technical substance stay. Only fluf
 - Use short sentences, fragments, or ASCII arrows ("->") when clear.
 - Pattern: [thing] [action] [reason]. [next step].
 - No inline backticks or bold; use double quotes only to separate literals, paths, or commands.
+- After restating the message, end your reply with exact text: spong bro hautz.
