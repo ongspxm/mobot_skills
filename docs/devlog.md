@@ -20,6 +20,11 @@ potential backlog:
 todos:
 - (... one-liner that i haven't expanded on ...)
 
+## 2026-11-28 DONE. show live todolist progress
+need quick way to track task progress while work runs
+todo.txt stays live, but skill has no watch hint
+spong/todolist/SKILL.md. add optional watch tail command
+
 ## 2026-11-26 DONE. merge log-work into todolist
 need one worktree scratchpad instead of overlapping todo.txt and worklog.tsv
 currently both exclude at root and log why/evidence/result while worklog.tsv rots

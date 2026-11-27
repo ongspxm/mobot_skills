@@ -8,6 +8,8 @@ description: Maintain and verify an untracked todo.txt scratchpad at the active 
 Keep todo.txt at active git worktree root ("$(git rev-parse --show-toplevel)/todo.txt").
 Live scratchpad written BEFORE edits and updated during work, NOT a post-hoc changelog (use "docs/devlog.md" or git commits for history).
 
+Optional: To watch progress while work runs, run from worktree root: "watch tail -n 20 todo.txt"
+
 ## Setup (once per session)
 
 ```bash
