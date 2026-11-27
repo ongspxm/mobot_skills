@@ -8,6 +8,7 @@ split multiline, one point per line.
 states: TODO for new, DONE for completed, PARK for future, REJECT for wontfix.
 ORDER: older entries at bottom
 entry heading: ## YYYY-MM-DD <STATE>. <short title>
+Put one blank line before each entry heading.
 
 migration: start clean devlog.md with header copied over,
 save old file as YYYYMMDD-devlog.md (YYYYMMDD = most recent date in old file).

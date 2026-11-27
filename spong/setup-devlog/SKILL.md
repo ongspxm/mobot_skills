@@ -7,7 +7,8 @@ description: Set up docs/devlog.md and AGENTS.md devlog interface for a repo.
 
 Create "docs/devlog.md" from "templates/docs/devlog.md" and add devlog rules to "AGENTS.md" in target repo.
 
-1. Create "docs/devlog.md" only if missing (never overwrite existing log):
+1. Read target "AGENTS.md" and "docs/devlog.md" if present. Draft exact changes -> pause at spong-mode gate before writing.
+2. Create "docs/devlog.md" only if missing (never overwrite existing log):
 
 ```bash
 top=$(git rev-parse --show-toplevel)
@@ -20,7 +21,7 @@ if [ ! -e "$top/docs/devlog.md" ]; then
 fi
 ```
 
-2. Add "# devlog" section to "$top/AGENTS.md" if missing:
+3. Add "# devlog" section to "$top/AGENTS.md" if missing:
 
 ```bash
 agents="$top/AGENTS.md"
@@ -32,10 +33,11 @@ if ! grep -q '^# devlog' "$agents" 2>/dev/null; then
   cat <<'EOF' >> "$agents"
 # devlog (your interface with dev)
 - dev gives task details via "docs/devlog.md"; read only portions relevant to task
-- NEVER edit "docs/devlog.md" without explicit OK
+- read "docs/devlog.md" and draft entry first; NEVER edit without explicit OK on draft
+- Put one blank line before each "## YYYY-MM-DD ..." entry.
 - CONSISTENCY: clarify when devlog details mismatch what you are asked to do
 EOF
 fi
 ```
 
-3. Verify "docs/devlog.md" and "AGENTS.md" with "git status" and "git diff". Commit only when asked.
+4. Verify "docs/devlog.md" and "AGENTS.md" with "git status" and "git diff". Commit only when asked.
