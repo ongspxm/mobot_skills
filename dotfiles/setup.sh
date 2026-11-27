@@ -52,7 +52,9 @@ fi
 mkdir -p "$HOME/.agents/skills"
 find "$HOME/.agents/skills" -mindepth 1 -maxdepth 1 -type l -delete
 for s in "$DIRNAME/../spong"/*/; do
-    target="$HOME/.agents/skills/$(basename "${s%/}")"
+    skill="$(basename "${s%/}")"
+    echo "[LOG] skill=$skill"
+    target="$HOME/.agents/skills/$skill"
     check_dir_clear "$target"
     ln -sfn "${s%/}" "$target"
 done
@@ -78,7 +80,7 @@ aifiles "$HOME/.prime/agent"
 aifiles "$HOME/.config/opencode"
 aifiles "$HOME/.copilot"
 
-ln -sfn "$DIRNAME/../pi-extensions" "$HOME/.pi/agent/extensions"
+ln -sfn "$DIRNAME/../pi-stuff/pi-extensions" "$HOME/.pi/agent/extensions"
 bash "$DIRNAME/../scripts/setup-githooks.sh"
 
 [ -f "$HOME/.bashrc" ] || : > "$HOME/.bashrc"

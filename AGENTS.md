@@ -20,13 +20,11 @@
 # user AGENTS.md
 USER.AGENTS.md is linked to ~/AGENTS.md (and agent dirs) via dotfiles/setup.sh, and loaded in all repos and subdirs.
 
-# pi settings
-pi.settings.json should be appended to ~/.pi/agent/settings.json as sane defaults.
-pi-extensions/ is linked to ~/.pi/agent/extensions via dotfiles/setup.sh.
-
 # spong
-spong/ holds core workflow, principle, and repo setup skills; dotfiles/setup.sh links them into ~/.agents/skills and agent dirs.
-setup-spong at repo root symlinks spong/setup-spong/ for skill discovery.
+Edit Spong skill source under spong/. Root setup-spong symlink points to spong/setup-spong/ for skill discovery.
 
-# hooks
-run ./dotfiles/setup.sh (or ./scripts/setup-githooks.sh) to configure core.hooksPath=.githooks and pre-commit checks.
+# devlog (your interface with dev)
+- dev gives task details via "docs/devlog.md"; read only portions relevant to task
+- read "docs/devlog.md" and draft entry first; NEVER edit without explicit OK on draft
+- Put one blank line before each "## YYYY-MM-DD ..." entry.
+- CONSISTENCY: clarify when devlog details mismatch what you are asked to do
