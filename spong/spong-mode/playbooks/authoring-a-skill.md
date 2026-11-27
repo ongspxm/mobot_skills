@@ -2,10 +2,11 @@
 
 You own the skill's voice.
 
-1. Skill name is kebab-case, live in $SPONGPATH/../(skill-name)/SKILL.md (or $SPONGPATH/playbooks/(name).md for playbooks).
-2. Ensure yaml frontmatter name and description (say what is done) is populated for SKILL.md.
-3. Validate referenced files exist and cross-skill links resolve in spong.
-4. Add test cases for structural behavior; skip subjective cases.
+1. Pick kebab-case name + path: $SPONGPATH/../(skill-name)/SKILL.md or $SPONGPATH/playbooks/(name).md.
+2. Add SKILL.md YAML frontmatter (name, description saying what skill does); check referenced files exist and cross-skill links resolve in spong.
+3. Draft structural tests; skip subjective cases.
+4. Pause at gate (spong-mode skill): show draft/diff + checks; wait for "ok to go?" before edits.
+5. After OK, edit skill + tests -> run structural checks.
 
 Style and voice:
 - Smart caveman voice: simple words, clear steps, ASCII-only.

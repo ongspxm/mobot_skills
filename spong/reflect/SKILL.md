@@ -1,7 +1,6 @@
 ---
 name: reflect
 description: Mine session and repo history for repeated mistakes; fix at highest enforceable level or update skill.
-disable-model-invocation: true
 ---
 
 # Reflect

@@ -1,7 +1,6 @@
 ---
 name: blast-radius
 description: Find hidden breakage beyond direct callers and prove one safety fact by running real code.
-disable-model-invocation: true
 ---
 
 # Blast Radius

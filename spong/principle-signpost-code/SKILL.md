@@ -1,7 +1,6 @@
 ---
 name: principle-signpost-code
 description: Mark sections, big steps, conventions, and non-obvious intent in flat code; delete narrating slop and workaround alibis.
-disable-model-invocation: true
 ---
 
 # Signpost Code

@@ -1,7 +1,6 @@
 ---
 name: principle-run-it-yourself
 description: Run the real artifact and inspect actual output. Never skip a check you can run.
-disable-model-invocation: true
 ---
 
 # Run It Yourself

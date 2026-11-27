@@ -1,7 +1,6 @@
 ---
 name: audit-comments
 description: Fresh-eyes comment audit on files or diff. Strip slop, fix alibi code, add missing signposts.
-disable-model-invocation: true
 ---
 
 # Audit Comments

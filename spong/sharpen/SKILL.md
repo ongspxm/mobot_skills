@@ -1,7 +1,6 @@
 ---
 name: sharpen
 description: Deepen a draft prompt before starting work using specialist methods, raw sources, and external checks.
-disable-model-invocation: true
 ---
 
 # Sharpen

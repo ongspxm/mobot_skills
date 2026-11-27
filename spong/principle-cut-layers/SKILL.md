@@ -1,7 +1,6 @@
 ---
 name: principle-cut-layers
 description: Inline one-caller wrappers. Shrink mutable state. Cut reader load.
-disable-model-invocation: true
 ---
 
 # Cut Layers

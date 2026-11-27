@@ -1,7 +1,6 @@
 ---
 name: principle-data-shape-first
 description: Design types and structures before logic. Make invalid states unrepresentable.
-disable-model-invocation: true
 ---
 
 # Data Shape First

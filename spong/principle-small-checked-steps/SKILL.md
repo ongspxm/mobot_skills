@@ -1,7 +1,6 @@
 ---
 name: principle-small-checked-steps
 description: Change one unit, verify it, then proceed. One concern, one commit
-disable-model-invocation: true
 ---
 
 # Small Checked Steps

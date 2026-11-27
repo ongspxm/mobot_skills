@@ -1,7 +1,6 @@
 ---
 name: principle-fix-root-cause
 description: Trace failures to the first mismatched expectation. Test shared assumptions before retrying fixes.
-disable-model-invocation: true
 ---
 
 # Fix Root Cause

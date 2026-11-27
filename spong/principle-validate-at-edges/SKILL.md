@@ -1,7 +1,6 @@
 ---
 name: principle-validate-at-edges
 description: Parse and validate external data at boundaries. Keep core logic pure.
-disable-model-invocation: true
 ---
 
 # Validate at Edges

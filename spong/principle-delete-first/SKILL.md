@@ -1,7 +1,6 @@
 ---
 name: principle-delete-first
 description: Delete dead code and do cleanup before building. Prefer native stdlib, smallest diff wins.
-disable-model-invocation: true
 ---
 
 # Delete First

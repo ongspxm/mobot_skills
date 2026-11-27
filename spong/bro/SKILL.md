@@ -1,7 +1,6 @@
 ---
 name: bro
 description: Restate the last message in smart caveman style.
-disable-model-invocation: true
 ---
 
 # Bro

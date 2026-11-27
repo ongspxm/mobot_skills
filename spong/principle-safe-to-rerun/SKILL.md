@@ -1,7 +1,6 @@
 ---
 name: principle-safe-to-rerun
 description: Scripts and operations must be idempotent. Make them safe to re-run after crashes.
-disable-model-invocation: true
 ---
 
 # Safe to Rerun

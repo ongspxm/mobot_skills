@@ -8,6 +8,6 @@ Audit code, diffs, plans, or PRs before calling work done.
 4. Check correctness, edge validation, error paths, secrets, PII, dead code, and debug residue. Run blast-radius skill when diff touches external/wire/DB contracts or async/teardown timing.
 5. Run real checks yourself; verify tests check changed outputs, not internals.
 6. Check AGENTS.md rules (ASCII-only files, key TODO/HACKY comments, confirmation gate followed).
-7. Report findings as blocker, concern, or nit with file:line; drop speculative style or future-risk claims not backed by real code path or run. Fix blockers only after OK; else report.
+7. Number findings in severity order (blocker, concern, nit) with file:line; drop style or future-risk claims lacking real code path or run. Fix blockers only after OK; else report.
 
-Reply with: verdict, findings by severity (file:line), checks run and output, remaining risk.
+Reply with: verdict, numbered findings by severity (file:line), checks + output, remaining risk.

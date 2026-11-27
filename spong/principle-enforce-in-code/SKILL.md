@@ -1,7 +1,6 @@
 ---
 name: principle-enforce-in-code
 description: Encode repeated rules and manual work in a lint, hook, type, or script.
-disable-model-invocation: true
 ---
 
 # Enforce in Code
